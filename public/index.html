@@ -280,4 +280,19 @@
             <div style="font-size:72px;margin-bottom:24px;">🏆</div>
             <p style="color:#fff;font-size:28px;font-weight:500;margin:0 0 8px;">Treino concluído!</p>
             <p style="color:#888;font-size:15px;margin:0 0 8px;">Treino ${key} · ${exercises.length} exercícios</p>
-            <p style="color:#f97316;font-size:
+            <p style="color:#f97316;font-size:14px;margin:0 0 48px;">★ ${getStreak()} dias de sequência</p>
+            <button onclick="renderDashboard()" style="width:100%;max-width:320px;padding:16px;background:#fff;border:none;border-radius:14px;color:#0d0d0f;font-size:16px;font-weight:500;cursor:pointer;">Voltar ao início</button>
+          </div>`;
+      }
+
+      render();
+    };
+
+    window.resetApp = function() {
+      if (confirm('Sair e apagar dados?')) { localStorage.clear(); renderOnboarding(); }
+    };
+
+    init();
+  </script>
+</body>
+</html>

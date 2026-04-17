@@ -3,111 +3,139 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
-  <meta name="theme-color" content="#f5f5f7"/>
+  <meta name="theme-color" content="#0c0c0e"/>
   <link rel="manifest" href="/manifest.json"/>
   <title>GymApp</title>
   <style>
     :root{
-      --bg:#f5f5f7; --card:#fff; --card2:#ededf0;
-      --border:rgba(0,0,0,.07); --border2:rgba(0,0,0,.12);
-      --text:#111114; --subtle:#6e6e80; --muted:#aeaebe;
-      --accent:#5b4fff; --accent-light:#ede9ff; --accent-dark:#4338e0;
-      --green:#16a34a; --green-light:#dcfce7;
-      --orange:#ea580c; --orange-light:#ffedd5;
-      --red:#dc2626; --red-light:#fee2e2;
+      /* Dark premium palette — inspired by Strong / Whoop */
+      --bg:#0c0c0e;
+      --surface:#141416;
+      --surface2:#1c1c1f;
+      --surface3:#242428;
+      --border:#2a2a2e;
+      --border-strong:#3a3a3f;
+      --text:#f0f0f2;
+      --text2:#a0a0a8;
+      --text3:#606068;
+      --lime:#c8f135;        /* signature accent — premium athletic */
+      --lime-dim:#1e2a06;
+      --lime-border:#3a5010;
+      --amber:#f5a623;
+      --amber-dim:#2a1e06;
+      --red:#e05252;
+      --red-dim:#2a0a0a;
+      --blue:#4a9eff;
+      --blue-dim:#061828;
     }
     *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
     html,body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;overscroll-behavior:none;}
     button,input,select,textarea{font-family:inherit;}
     #app{max-width:430px;margin:0 auto;min-height:100vh;}
 
-    @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
-    @keyframes slideIn{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);}}
-    @keyframes pop{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
-    .fade-in{animation:fadeUp .25s ease both;}
-    .slide-in{animation:slideIn .25s ease both;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+    @keyframes pop{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
+    .fade-in{animation:fadeUp .22s ease both;}
 
     .px{padding-left:20px;padding-right:20px;}
     .pt-safe{padding-top:max(20px,env(safe-area-inset-top));}
 
-    /* Cards */
-    .card{background:var(--card);border-radius:20px;overflow:hidden;box-shadow:0 1px 12px rgba(0,0,0,.06);}
-    .card-sm{background:var(--card);border-radius:14px;padding:16px;box-shadow:0 1px 8px rgba(0,0,0,.05);}
-    .card-flat{background:var(--card);border-radius:14px;padding:16px;border:1.5px solid var(--border);}
+    /* ── Cards ── */
+    .card{background:var(--surface);border-radius:16px;overflow:hidden;border:1px solid var(--border);}
+    .card-sm{background:var(--surface);border-radius:12px;padding:16px;border:1px solid var(--border);}
+    .card-inset{background:var(--bg);border-radius:10px;padding:14px 16px;border:1px solid var(--border);}
 
-    /* Buttons */
-    .btn{width:100%;padding:15px;border:none;border-radius:14px;font-size:16px;font-weight:600;cursor:pointer;transition:transform .1s,opacity .15s,background .15s;}
-    .btn:active{transform:scale(.98);opacity:.88;}
-    .btn-dark{background:var(--text);color:#fff;}
-    .btn-accent{background:var(--accent);color:#fff;}
-    .btn-ghost{background:transparent;border:1.5px solid var(--border2);color:var(--subtle);}
-    .btn-light{background:var(--card2);color:var(--text);}
-    .btn-green{background:var(--green);color:#fff;}
+    /* ── Buttons ── */
+    .btn{width:100%;padding:15px;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;letter-spacing:.01em;transition:transform .1s,opacity .15s;}
+    .btn:active{transform:scale(.98);opacity:.9;}
 
-    /* Inputs */
-    .inp{width:100%;padding:14px 16px;background:var(--bg);border:1.5px solid var(--border);border-radius:12px;color:var(--text);font-size:16px;outline:none;transition:border-color .15s;}
-    .inp:focus{border-color:var(--accent);}
+    /* Primary — lime on dark */
+    .btn-primary{background:var(--lime);color:#0c0c0e;border:none;box-shadow:0 0 0 1px rgba(200,241,53,.15),0 4px 16px rgba(200,241,53,.12);}
+    .btn-primary:active{background:#b8e020;}
+
+    /* Secondary — outlined */
+    .btn-secondary{background:transparent;color:var(--text);border:1px solid var(--border-strong);}
+    .btn-secondary:active{background:var(--surface2);}
+
+    /* Ghost — minimal */
+    .btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border);}
+
+    /* Danger */
+    .btn-danger{background:transparent;color:var(--red);border:1px solid var(--red-dim);}
+
+    /* ── Inputs ── */
+    .inp{width:100%;padding:13px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:16px;outline:none;transition:border-color .15s;}
+    .inp:focus{border-color:var(--lime);}
+    .inp::placeholder{color:var(--text3);}
     select.inp{-webkit-appearance:none;}
 
-    /* Bottom nav */
-    .bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--card);border-top:1px solid var(--border);display:flex;z-index:50;padding-bottom:env(safe-area-inset-bottom,0);}
-    .bnav-btn{flex:1;padding:10px 0 12px;border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;}
-    .bnav-btn .ic{font-size:21px;}
-    .bnav-btn .lb{font-size:10px;font-weight:500;color:var(--muted);}
-    .bnav-btn.on .lb{color:var(--accent);}
+    /* ── Bottom nav ── */
+    .bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--surface);border-top:1px solid var(--border);display:flex;z-index:50;padding-bottom:env(safe-area-inset-bottom,0);}
+    .bnav-btn{flex:1;padding:10px 0 12px;border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;}
+    .bnav-btn .ic{width:22px;height:22px;display:flex;align-items:center;justify-content:center;}
+    .bnav-btn .lb{font-size:10px;font-weight:500;color:var(--text3);letter-spacing:.02em;}
+    .bnav-btn.on .lb{color:var(--lime);}
+    .bnav-btn.on svg{stroke:var(--lime) !important;}
 
-    /* Labels */
-    .label{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.07em;font-weight:600;}
+    /* ── Labels ── */
+    .label{color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:600;}
 
-    /* Chips */
-    .chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:500;}
-    .chip-green{background:var(--green-light);color:var(--green);}
-    .chip-orange{background:var(--orange-light);color:var(--orange);}
-    .chip-accent{background:var(--accent-light);color:var(--accent);}
-    .chip-red{background:var(--red-light);color:var(--red);}
+    /* ── Badges ── */
+    .badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;letter-spacing:.01em;}
+    .badge-lime{background:var(--lime-dim);color:var(--lime);border:1px solid var(--lime-border);}
+    .badge-amber{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,166,35,.2);}
+    .badge-red{background:var(--red-dim);color:var(--red);border:1px solid rgba(224,82,82,.2);}
+    .badge-neutral{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
 
-    /* Set row */
-    .set-row{display:flex;align-items:center;padding:14px 16px;gap:12px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;}
+    /* ── Set row ── */
+    .set-row{display:flex;align-items:center;padding:14px 16px;gap:12px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;}
     .set-row:last-child{border-bottom:none;}
-    .set-row.done{background:#f0fdf4;}
-    .set-row.active{background:var(--accent-light);}
+    .set-row.done{background:rgba(200,241,53,.04);}
+    .set-row.active{background:rgba(200,241,53,.06);}
 
-    /* Rep grid */
-    .rep-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
-    .rep-btn{padding:14px 0;background:var(--card);border:1.5px solid var(--border);border-radius:12px;color:var(--text);font-size:16px;font-weight:500;cursor:pointer;transition:all .1s;}
-    .rep-btn:active{background:var(--accent);color:#fff;border-color:var(--accent);}
+    /* ── Rep grid ── */
+    .rep-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;}
+    .rep-btn{padding:14px 0;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:16px;font-weight:500;cursor:pointer;transition:all .1s;}
+    .rep-btn:active{background:var(--lime);color:#0c0c0e;border-color:var(--lime);}
 
-    /* Progress */
-    .prog-bar{height:3px;background:var(--card2);border-radius:4px;overflow:hidden;}
-    .prog-fill{height:100%;background:var(--accent);border-radius:4px;transition:width .4s ease;}
+    /* ── Progress bar ── */
+    .prog-bar{height:2px;background:var(--surface3);border-radius:2px;overflow:hidden;}
+    .prog-fill{height:100%;background:var(--lime);border-radius:2px;transition:width .4s ease;}
 
-    /* Overlay / Sheet */
-    .overlay{position:fixed;inset:0;z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;background:rgba(0,0,0,.45);}
-    .sheet{background:var(--card);border-radius:24px 24px 0 0;padding:20px 20px max(32px,env(safe-area-inset-bottom));width:100%;max-width:430px;max-height:88vh;overflow-y:auto;}
-    .sheet-handle{width:40px;height:4px;background:var(--card2);border-radius:4px;margin:0 auto 20px;}
+    /* ── Overlay / Sheet ── */
+    .overlay{position:fixed;inset:0;z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;background:rgba(0,0,0,.7);}
+    .sheet{background:var(--surface);border-radius:20px 20px 0 0;border-top:1px solid var(--border);padding:20px 20px max(32px,env(safe-area-inset-bottom));width:100%;max-width:430px;max-height:88vh;overflow-y:auto;}
+    .sheet-handle{width:36px;height:3px;background:var(--surface3);border-radius:3px;margin:0 auto 20px;}
 
-    /* Onboarding step */
+    /* ── Onboarding ── */
     .ob-step{padding:0 20px 40px;min-height:100vh;display:flex;flex-direction:column;justify-content:center;}
 
-    /* Day picker */
-    .day-cell{flex:1;aspect-ratio:1;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;border:1.5px solid var(--border);background:var(--card);transition:all .15s;}
-    .day-cell.on{background:var(--accent);border-color:var(--accent);}
-    .day-cell.on span{color:#fff !important;}
+    /* ── Day cell ── */
+    .day-cell{flex:1;aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;border:1px solid var(--border);background:var(--surface);transition:all .15s;}
+    .day-cell.on{background:var(--lime-dim);border-color:var(--lime-border);}
+    .day-cell.on .dc-d{color:var(--lime) !important;}
+    .day-cell.on .dc-k{color:var(--lime) !important;opacity:.8;}
 
-    /* Select pill */
-    .sel-pill{padding:12px 16px;border-radius:12px;border:1.5px solid var(--border);background:var(--card);cursor:pointer;transition:all .15s;text-align:center;}
-    .sel-pill.on{border-color:var(--accent);background:var(--accent-light);}
-    .sel-pill.on p{color:var(--accent);}
+    /* ── Select option ── */
+    .sel-opt{padding:14px 16px;border-radius:10px;border:1px solid var(--border);background:var(--surface);cursor:pointer;transition:all .15s;text-align:left;width:100%;}
+    .sel-opt.on{border-color:var(--lime-border);background:var(--lime-dim);}
+    .sel-opt.on .so-title{color:var(--lime);}
 
-    /* Workout hero */
-    .hero-card{background:linear-gradient(135deg,#5b4fff 0%,#7c6fff 100%);border-radius:20px;padding:24px;color:#fff;box-shadow:0 8px 28px rgba(91,79,255,.28);}
+    /* ── Hero card ── */
+    .hero-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;}
 
-    /* Stat box */
-    .stat-box{background:var(--card);border-radius:16px;padding:16px;box-shadow:0 1px 8px rgba(0,0,0,.05);}
+    /* ── Stat box ── */
+    .stat-box{background:var(--surface);border-radius:12px;padding:16px;border:1px solid var(--border);}
 
-    /* Weight test row */
+    /* ── Divider ── */
+    .divider{height:1px;background:var(--border);margin:0;}
+
+    /* ── Wt row ── */
     .wt-row{display:flex;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);gap:10px;}
     .wt-row:last-child{border-bottom:none;}
+
+    /* ── Info button ── */
+    .info-btn{width:26px;height:26px;border-radius:50%;background:var(--surface2);border:1px solid var(--border-strong);color:var(--text2);font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-style:italic;}
   </style>
 </head>
 <body>
@@ -118,7 +146,7 @@
 const DAY_NAMES=['Domingo','Segunda','Terca','Quarta','Quinta','Sexta','Sabado'];
 const DAY_SHORT=['D','S','T','Q','Q','S','S'];
 const WORKOUT_KEYS=['A','B','C','D','E'];
-const TYPE_EMOJI={upper:'💪',legs:'🦵',core:'🔥'};
+const TYPE_LABEL={upper:'Upper',legs:'Legs',core:'Core'};
 
 // Exercise library — full pool
 const EX_LIBRARY = {
@@ -299,11 +327,11 @@ function autoAdjustAfterSession(exercises, sessionData) {
       const ex = wk[key].find(e=>e.name===sd.name);
       if(!ex || ex.unit==='corpo' || ex.unit==='level') return;
       let newW = ex.weight;
-      if(avg23 >= 18) newW = ex.weight + 10;       // very easy → +10
-      else if(avg23 >= 14) newW = ex.weight + 5;   // easy → +5
-      else if(avg23 >= 12) newW = ex.weight + 2.5; // good → +2.5
-      else if(avg23 < 6)   newW = ex.weight - 5;   // too hard → -5
-      else if(avg23 < 8)   newW = ex.weight - 2.5; // hard → -2.5
+      if(avg23 >= 18) newW = ex.weight + 10;       // very easy &rarr; +10
+      else if(avg23 >= 14) newW = ex.weight + 5;   // easy &rarr; +5
+      else if(avg23 >= 12) newW = ex.weight + 2.5; // good &rarr; +2.5
+      else if(avg23 < 6)   newW = ex.weight - 5;   // too hard &rarr; -5
+      else if(avg23 < 8)   newW = ex.weight - 2.5; // hard &rarr; -2.5
       if(newW !== ex.weight) { ex.weight = Math.max(0, newW); changed = true; }
     });
   });
@@ -568,30 +596,30 @@ window.showExInfo = function(exName) {
     <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;">
       <div>
         <p style="font-size:18px;font-weight:800;line-height:1.2;">${exName}</p>
-        <p style="color:var(--muted);font-size:12px;margin-top:4px;">💪 ${info.muscles}</p>
+        <p style="color:var(--text3);font-size:12px;margin-top:4px;"> ${info.muscles}</p>
       </div>
     </div>
 
     ${info.caution ? `
-    <div style="background:var(--orange-light);border-radius:10px;padding:10px 14px;margin-bottom:16px;">
-      <p style="color:var(--orange);font-size:13px;font-weight:600;">⚠ ${info.caution}</p>
+    <div style="background:var(--amber-dim);border-radius:10px;padding:10px 14px;margin-bottom:16px;">
+      <p style="color:var(--amber);font-size:13px;font-weight:600;">! ${info.caution}</p>
     </div>` : ''}
 
     <div style="margin-bottom:16px;">
-      <p style="font-size:13px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Como executar</p>
+      <p style="font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Como executar</p>
       ${info.howto.map((step, i) => `
         <div style="display:flex;gap:10px;margin-bottom:10px;">
-          <div style="width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:1px;">${i+1}</div>
+          <div style="width:24px;height:24px;border-radius:50%;background:var(--lime);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:1px;">${i+1}</div>
           <p style="font-size:14px;line-height:1.6;color:var(--text);">${step}</p>
         </div>`).join('')}
     </div>
 
-    <div style="background:var(--accent-light);border-radius:12px;padding:12px 14px;margin-bottom:20px;">
-      <p style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:4px;">💡 Dica do personal</p>
-      <p style="font-size:13px;color:var(--accent);line-height:1.6;">${info.tips}</p>
+    <div style="background:var(--lime-dim);border-radius:12px;padding:12px 14px;margin-bottom:20px;">
+      <p style="font-size:12px;font-weight:700;color:var(--lime);margin-bottom:4px;">💡 Dica do personal</p>
+      <p style="font-size:13px;color:var(--lime);line-height:1.6;">${info.tips}</p>
     </div>
 
-    <button class="btn btn-dark" onclick="$('exinfo-ov').remove()">Entendido</button>
+    <button class="btn btn-primary" onclick="$('exinfo-ov').remove()">Entendido</button>
   </div>`;
   ov.onclick = e => { if(e.target===ov) ov.remove(); };
   document.body.appendChild(ov);
@@ -599,11 +627,21 @@ window.showExInfo = function(exName) {
 
 // ─── BOTTOM NAV ───────────────────────────────────────────────────────────────
 function bnav(active) {
+  const ico = (name, active) => {
+    const s = active ? 'var(--lime)' : 'var(--text3)';
+    const icons = {
+      home: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="${s}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
+      history: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="${s}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,
+      weights: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="${s}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><path d="M5 12H2m20 0h-3M5 12a7 7 0 0 1 14 0M5 12a7 7 0 0 0 14 0"/><rect x="2" y="10" width="3" height="4" rx="1"/><rect x="19" y="10" width="3" height="4" rx="1"/></svg>`,
+      profile: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="${s}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+    };
+    return icons[name] || '';
+  };
   return `<div class="bnav">
-    <button class="bnav-btn ${active==='home'?'on':''}" onclick="renderDashboard('home')"><span class="ic">🏠</span><span class="lb">Inicio</span></button>
-    <button class="bnav-btn ${active==='history'?'on':''}" onclick="renderDashboard('history')"><span class="ic">📋</span><span class="lb">Historico</span></button>
-    <button class="bnav-btn ${active==='weights'?'on':''}" onclick="renderDashboard('weights')"><span class="ic">⚖️</span><span class="lb">Pesos</span></button>
-    <button class="bnav-btn ${active==='profile'?'on':''}" onclick="renderProfile()"><span class="ic">👤</span><span class="lb">Perfil</span></button>
+    <button class="bnav-btn ${active==='home'?'on':''}" onclick="renderDashboard('home')"><span class="ic">${ico('home',active==='home')}</span><span class="lb">Inicio</span></button>
+    <button class="bnav-btn ${active==='history'?'on':''}" onclick="renderDashboard('history')"><span class="ic">${ico('history',active==='history')}</span><span class="lb">Historico</span></button>
+    <button class="bnav-btn ${active==='weights'?'on':''}" onclick="renderDashboard('weights')"><span class="ic">${ico('weights',active==='weights')}</span><span class="lb">Pesos</span></button>
+    <button class="bnav-btn ${active==='profile'?'on':''}" onclick="renderProfile()"><span class="ic">${ico('profile',active==='profile')}</span><span class="lb">Perfil</span></button>
   </div>`;
 }
 
@@ -621,7 +659,7 @@ function renderOnboarding(step) {
 function obProgress(step) {
   return `<div style="display:flex;gap:6px;margin-bottom:32px;">
     ${[1,2,3,4,5,6].map(i=>`
-      <div style="flex:1;height:3px;border-radius:4px;background:${i<=step?'var(--accent)':'var(--card2)'};transition:background .3s;"></div>`).join('')}
+      <div style="flex:1;height:3px;border-radius:4px;background:${i<=step?'var(--lime)':'var(--surface2)'};transition:background .3s;"></div>`).join('')}
   </div>`;
 }
 
@@ -630,39 +668,39 @@ function obStep1() {
   return `<div class="ob-step fade-in pt-safe">
     ${obProgress(1)}
     <div style="margin-bottom:32px;">
-      <p style="font-size:13px;color:var(--muted);font-weight:500;margin-bottom:8px;">PASSO 1 DE 6</p>
-      <h1 style="font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-bottom:10px;">Vamos te<br>conhecer. 👋</h1>
-      <p style="color:var(--subtle);font-size:15px;line-height:1.6;">Essas informacoes ajudam a estimar seus pesos iniciais com precisao.</p>
+      <p style="font-size:13px;color:var(--text3);font-weight:500;margin-bottom:8px;">PASSO 1 DE 6</p>
+      <h1 style="font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-bottom:10px;">Vamos te<br>conhecer.</h1>
+      <p style="color:var(--text2);font-size:15px;line-height:1.6;">Essas informacoes ajudam a estimar seus pesos iniciais com precisao.</p>
     </div>
 
     <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:28px;">
       <div>
-        <label style="display:block;color:var(--subtle);font-size:13px;font-weight:500;margin-bottom:8px;">Seu nome</label>
+        <label style="display:block;color:var(--text2);font-size:13px;font-weight:500;margin-bottom:8px;">Seu nome</label>
         <input id="ob1_name" class="inp" type="text" placeholder="Rafael" autocomplete="given-name" value="${OB.name||''}"/>
       </div>
       <div style="display:flex;gap:10px;">
         <div style="flex:1;">
-          <label style="display:block;color:var(--subtle);font-size:13px;font-weight:500;margin-bottom:8px;">Altura (cm)</label>
+          <label style="display:block;color:var(--text2);font-size:13px;font-weight:500;margin-bottom:8px;">Altura (cm)</label>
           <input id="ob1_height" class="inp" type="number" min="140" max="220" placeholder="175" style="text-align:center;" value="${OB.height||''}"/>
         </div>
         <div style="flex:1;">
-          <label style="display:block;color:var(--subtle);font-size:13px;font-weight:500;margin-bottom:8px;">Peso (kg)</label>
+          <label style="display:block;color:var(--text2);font-size:13px;font-weight:500;margin-bottom:8px;">Peso (kg)</label>
           <input id="ob1_weight" class="inp" type="number" min="40" max="200" placeholder="80" style="text-align:center;" value="${OB.weight||''}"/>
         </div>
       </div>
       <div>
-        <label style="display:block;color:var(--subtle);font-size:13px;font-weight:500;margin-bottom:10px;">Sexo biologico <span style="color:var(--muted);font-size:11px;">(afeta estimativa de forca)</span></label>
+        <label style="display:block;color:var(--text2);font-size:13px;font-weight:500;margin-bottom:10px;">Sexo biologico <span style="color:var(--text3);font-size:11px;">(afeta estimativa de forca)</span></label>
         <div style="display:flex;gap:8px;">
           ${[['M','Masculino'],['F','Feminino']].map(([v,l])=>`
             <button onclick="OB.sex='${v}';document.querySelectorAll('.sex-btn').forEach(b=>b.classList.remove('on'));this.classList.add('on');"
-              class="sel-pill sex-btn ${OB.sex===v?'on':''}" style="flex:1;">
+              class="sel-opt sex-btn ${OB.sex===v?'on':''}" style="flex:1;">
               <p style="font-size:14px;font-weight:600;color:var(--text);">${l}</p>
             </button>`).join('')}
         </div>
       </div>
     </div>
 
-    <button class="btn btn-dark" onclick="obNext1()">Continuar →</button>
+    <button class="btn btn-primary" onclick="obNext1()">Continuar &rarr;</button>
   </div>`;
 }
 window.obNext1 = function() {
@@ -682,26 +720,26 @@ function obStep2() {
   return `<div class="ob-step fade-in pt-safe">
     ${obProgress(2)}
     <div style="margin-bottom:28px;">
-      <p style="font-size:13px;color:var(--muted);font-weight:500;margin-bottom:8px;">PASSO 2 DE 6</p>
-      <h1 style="font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-bottom:10px;">Seu nivel e<br>objetivo. 🎯</h1>
-      <p style="color:var(--subtle);font-size:15px;line-height:1.6;">Isso define os pesos iniciais e a estrutura dos seus treinos.</p>
+      <p style="font-size:13px;color:var(--text3);font-weight:500;margin-bottom:8px;">PASSO 2 DE 6</p>
+      <h1 style="font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-bottom:10px;">Seu nivel e<br>objetivo.</h1>
+      <p style="color:var(--text2);font-size:15px;line-height:1.6;">Isso define os pesos iniciais e a estrutura dos seus treinos.</p>
     </div>
 
     <div style="margin-bottom:22px;">
-      <label style="display:block;color:var(--subtle);font-size:13px;font-weight:500;margin-bottom:10px;">Nivel de experiencia na musculacao</label>
+      <label style="display:block;color:var(--text2);font-size:13px;font-weight:500;margin-bottom:10px;">Nivel de experiencia na musculacao</label>
       <div style="display:flex;flex-direction:column;gap:8px;">
         ${[
-          ['beg','Iniciante','Menos de 1 ano de treino consistente','🌱'],
-          ['int','Intermediario','1 a 3 anos, ja conhece os equipamentos','💪'],
-          ['adv','Avancado','3+ anos, treino serio e progressivo','🔥'],
+          ['beg','Iniciante','Menos de 1 ano de treino consistente',''],
+          ['int','Intermediario','1 a 3 anos, ja conhece os equipamentos',''],
+          ['adv','Avancado','3+ anos, treino serio e progressivo',''],
         ].map(([v,l,d,e])=>`
           <button onclick="OB.level='${v}';document.querySelectorAll('.lv-btn').forEach(b=>b.classList.remove('on'));this.classList.add('on');"
-            class="sel-pill lv-btn ${OB.level===v?'on':''}" style="text-align:left;padding:14px 16px;">
+            class="sel-opt lv-btn ${OB.level===v?'on':''}" style="text-align:left;padding:14px 16px;">
             <div style="display:flex;align-items:center;gap:10px;">
               <span style="font-size:22px;">${e}</span>
               <div>
                 <p style="font-size:15px;font-weight:700;color:var(--text);">${l}</p>
-                <p style="font-size:12px;color:var(--muted);margin-top:2px;">${d}</p>
+                <p style="font-size:12px;color:var(--text3);margin-top:2px;">${d}</p>
               </div>
             </div>
           </button>`).join('')}
@@ -709,20 +747,20 @@ function obStep2() {
     </div>
 
     <div style="margin-bottom:28px;">
-      <label style="display:block;color:var(--subtle);font-size:13px;font-weight:500;margin-bottom:10px;">Foco do treino</label>
+      <label style="display:block;color:var(--text2);font-size:13px;font-weight:500;margin-bottom:10px;">Foco do treino</label>
       <div style="display:flex;flex-direction:column;gap:8px;">
         ${[
-          ['full','Full Body','Corpo inteiro em cada sessao — maximo eficiencia','⚡'],
-          ['upper','Upper Body','Foco em costas, peito, ombros e braccos','💪'],
-          ['lower','Lower Body','Foco em pernas, gluteos e core','🦵'],
+          ['full','Full Body','Corpo inteiro em cada sessao — maximo eficiencia',''],
+          ['upper','Upper Body','Foco em costas, peito, ombros e braccos',''],
+          ['lower','Lower Body','Foco em pernas, gluteos e core',''],
         ].map(([v,l,d,e])=>`
           <button onclick="OB.focus='${v}';document.querySelectorAll('.fc-btn').forEach(b=>b.classList.remove('on'));this.classList.add('on');"
-            class="sel-pill fc-btn ${OB.focus===v?'on':''}" style="text-align:left;padding:14px 16px;">
+            class="sel-opt fc-btn ${OB.focus===v?'on':''}" style="text-align:left;padding:14px 16px;">
             <div style="display:flex;align-items:center;gap:10px;">
               <span style="font-size:22px;">${e}</span>
               <div>
                 <p style="font-size:15px;font-weight:700;color:var(--text);">${l}</p>
-                <p style="font-size:12px;color:var(--muted);margin-top:2px;">${d}</p>
+                <p style="font-size:12px;color:var(--text3);margin-top:2px;">${d}</p>
               </div>
             </div>
           </button>`).join('')}
@@ -730,8 +768,8 @@ function obStep2() {
     </div>
 
     <div style="display:flex;gap:10px;">
-      <button class="btn btn-ghost" style="flex:.4;" onclick="renderOnboarding(1)">← Voltar</button>
-      <button class="btn btn-dark" style="flex:1;" onclick="obNext2()">Continuar →</button>
+      <button class="btn btn-ghost" style="flex:.4;" onclick="renderOnboarding(1)">&larr; Voltar</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="obNext2()">Continuar &rarr;</button>
     </div>
   </div>`;
 }
@@ -747,16 +785,16 @@ function obStep3() {
   return `<div class="ob-step fade-in pt-safe">
     ${obProgress(3)}
     <div style="margin-bottom:28px;">
-      <p style="font-size:13px;color:var(--muted);font-weight:500;margin-bottom:8px;">PASSO 3 DE 6</p>
-      <h1 style="font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-bottom:10px;">Sua agenda<br>de treinos. 📅</h1>
-      <p style="color:var(--subtle);font-size:15px;line-height:1.6;">Selecione os dias que voce vai treinar. Cada dia recebe um treino diferente (A, B, C...).</p>
+      <p style="font-size:13px;color:var(--text3);font-weight:500;margin-bottom:8px;">PASSO 3 DE 6</p>
+      <h1 style="font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-bottom:10px;">Sua agenda<br>de treinos.</h1>
+      <p style="color:var(--text2);font-size:15px;line-height:1.6;">Selecione os dias que voce vai treinar. Cada dia recebe um treino diferente (A, B, C...).</p>
     </div>
 
     <div style="display:flex;gap:6px;margin-bottom:20px;" id="day-picker">
       ${DAY_SHORT.map((d,i)=>`
         <div class="day-cell ${OB.selectedDays.includes(i)?'on':''}" onclick="toggleDay(${i})" id="dc_${i}">
-          <span style="font-size:12px;font-weight:700;color:${OB.selectedDays.includes(i)?'#fff':'var(--subtle)'};">${d}</span>
-          <span style="font-size:9px;color:${OB.selectedDays.includes(i)?'rgba(255,255,255,.7)':'var(--muted)'};" id="dc_lbl_${i}">
+          <span style="font-size:12px;font-weight:700;color:${OB.selectedDays.includes(i)?'#fff':'var(--text2)'};">${d}</span>
+          <span style="font-size:9px;color:${OB.selectedDays.includes(i)?'rgba(255,255,255,.7)':'var(--text3)'};" id="dc_lbl_${i}">
             ${OB.selectedDays.includes(i)?WORKOUT_KEYS[OB.selectedDays.indexOf(i)]:''}
           </span>
         </div>`).join('')}
@@ -765,8 +803,8 @@ function obStep3() {
     <div id="day-summary" style="margin-bottom:28px;"></div>
 
     <div style="display:flex;gap:10px;">
-      <button class="btn btn-ghost" style="flex:.4;" onclick="renderOnboarding(2)">← Voltar</button>
-      <button class="btn btn-dark" style="flex:1;" onclick="obNext3()">Continuar →</button>
+      <button class="btn btn-ghost" style="flex:.4;" onclick="renderOnboarding(2)">&larr; Voltar</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="obNext3()">Continuar &rarr;</button>
     </div>
   </div>`;
 }
@@ -789,11 +827,11 @@ window.toggleDay = function(i) {
   });
   [0,1,2,3,4,5,6].filter(d=>!OB.selectedDays.includes(d)).forEach(d=>{
     const cell=$('dc_'+d); const lbl=$('dc_lbl_'+d);
-    if(cell){cell.classList.remove('on');cell.querySelector('span').style.color='var(--subtle)';}
-    if(lbl){lbl.textContent='';lbl.style.color='var(--muted)';}
+    if(cell){cell.classList.remove('on');cell.querySelector('span').style.color='var(--text2)';}
+    if(lbl){lbl.textContent='';lbl.style.color='var(--text3)';}
   });
   const sum=$('day-summary');
-  if(sum) sum.innerHTML=`<div class="card-flat"><p style="font-size:13px;color:var(--subtle);">${OB.selectedDays.length} dias de treino: ${OB.selectedDays.map((d,i)=>DAY_NAMES[d]+' (Treino '+WORKOUT_KEYS[i]+')').join(', ')}</p></div>`;
+  if(sum) sum.innerHTML=`<div class="card-inset"><p style="font-size:13px;color:var(--text2);">${OB.selectedDays.length} dias de treino: ${OB.selectedDays.map((d,i)=>DAY_NAMES[d]+' (Treino '+WORKOUT_KEYS[i]+')').join(', ')}</p></div>`;
 };
 window.obNext3 = function() {
   if(!OB.selectedDays || OB.selectedDays.length<1) { alert('Selecione pelo menos 1 dia'); return; }
@@ -805,45 +843,45 @@ function obStep4gym() {
   return `<div class="ob-step fade-in pt-safe">
     ${obProgress(4)}
     <div style="margin-bottom:28px;">
-      <p style="font-size:13px;color:var(--muted);font-weight:500;margin-bottom:8px;">PASSO 4 DE 6</p>
-      <h1 style="font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-bottom:10px;">Sua academia<br>e equipamentos. 🏋️</h1>
-      <p style="color:var(--subtle);font-size:15px;line-height:1.6;">Para montar seus treinos, precisamos saber quais maquinas voce tem disponivel.</p>
+      <p style="font-size:13px;color:var(--text3);font-weight:500;margin-bottom:8px;">PASSO 4 DE 6</p>
+      <h1 style="font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-bottom:10px;">Sua academia<br>e equipamentos.</h1>
+      <p style="color:var(--text2);font-size:15px;line-height:1.6;">Para montar seus treinos, precisamos saber quais maquinas voce tem disponivel.</p>
     </div>
 
     <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:28px;">
 
       <!-- Option 1: Photo/Video — coming soon -->
-      <div style="padding:16px;border-radius:14px;border:1.5px solid var(--border);background:var(--card);opacity:.55;position:relative;">
+      <div style="padding:16px;border-radius:14px;border:1.5px solid var(--border);background:var(--surface);opacity:.55;position:relative;">
         <div style="display:flex;align-items:center;gap:12px;">
-          <span style="font-size:28px;">📸</span>
+          <span style="font-size:28px;"></span>
           <div>
             <p style="font-size:15px;font-weight:700;">Foto ou video da academia</p>
-            <p style="color:var(--muted);font-size:12px;margin-top:2px;">A IA reconhece as maquinas automaticamente</p>
+            <p style="color:var(--text3);font-size:12px;margin-top:2px;">A IA reconhece as maquinas automaticamente</p>
           </div>
         </div>
-        <div style="position:absolute;top:10px;right:12px;background:var(--card2);border-radius:20px;padding:3px 8px;"><span style="font-size:10px;font-weight:600;color:var(--muted);">EM BREVE</span></div>
+        <div style="position:absolute;top:10px;right:12px;background:var(--surface2);border-radius:20px;padding:3px 8px;"><span style="font-size:10px;font-weight:600;color:var(--text3);">EM BREVE</span></div>
       </div>
 
       <!-- Option 2: Manual list -->
       <button onclick="OB.gymMode='manual';document.querySelectorAll('.gym-opt').forEach(b=>b.classList.remove('on'));this.classList.add('on');"
-        class="sel-pill gym-opt ${OB.gymMode==='manual'?'on':''}" style="text-align:left;padding:16px;">
+        class="sel-opt gym-opt ${OB.gymMode==='manual'?'on':''}" style="text-align:left;padding:16px;">
         <div style="display:flex;align-items:center;gap:12px;">
-          <span style="font-size:28px;">✏️</span>
+          <span style="font-size:28px;"></span>
           <div>
             <p style="font-size:15px;font-weight:700;color:var(--text);">Selecionar manualmente</p>
-            <p style="color:var(--muted);font-size:12px;margin-top:2px;">Escolha os equipamentos da sua lista</p>
+            <p style="color:var(--text3);font-size:12px;margin-top:2px;">Escolha os equipamentos da sua lista</p>
           </div>
         </div>
       </button>
 
       <!-- Option 3: Use default -->
       <button onclick="OB.gymMode='default';document.querySelectorAll('.gym-opt').forEach(b=>b.classList.remove('on'));this.classList.add('on');"
-        class="sel-pill gym-opt ${OB.gymMode==='default'||!OB.gymMode?'on':''}" style="text-align:left;padding:16px;">
+        class="sel-opt gym-opt ${OB.gymMode==='default'||!OB.gymMode?'on':''}" style="text-align:left;padding:16px;">
         <div style="display:flex;align-items:center;gap:12px;">
-          <span style="font-size:28px;">⚡</span>
+          <span style="font-size:28px;"></span>
           <div>
             <p style="font-size:15px;font-weight:700;color:var(--text);">Usar lista padrao</p>
-            <p style="color:var(--muted);font-size:12px;margin-top:2px;">Equipamentos Genesis + Precor — academia completa</p>
+            <p style="color:var(--text3);font-size:12px;margin-top:2px;">Equipamentos Genesis + Precor — academia completa</p>
           </div>
         </div>
       </button>
@@ -851,21 +889,21 @@ function obStep4gym() {
 
     <!-- Manual equipment picker (shown when manual selected) -->
     <div id="manual-picker" style="display:${OB.gymMode==='manual'?'block':'none'};margin-bottom:20px;">
-      <p style="font-size:13px;font-weight:600;color:var(--subtle);margin-bottom:10px;">Selecione os equipamentos disponíveis:</p>
+      <p style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:10px;">Selecione os equipamentos disponíveis:</p>
       <div style="display:flex;flex-direction:column;gap:6px;">
         ${Object.keys(EX_LIBRARY).map(name=>`
-          <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--card);border-radius:10px;border:1.5px solid var(--border);cursor:pointer;">
+          <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border-radius:10px;border:1.5px solid var(--border);cursor:pointer;">
             <input type="checkbox" value="${name}" ${(OB.selectedEquip||Object.keys(EX_LIBRARY)).includes(name)?'checked':''} onchange="toggleEquip('${name}')"
-              style="width:18px;height:18px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;"/>
+              style="width:18px;height:18px;accent-color:var(--lime);cursor:pointer;flex-shrink:0;"/>
             <span style="font-size:13px;font-weight:500;">${name}</span>
-            <span style="margin-left:auto;font-size:14px;">${TYPE_EMOJI[EX_LIBRARY[name].type]||'💪'}</span>
+            <span style="margin-left:auto;font-size:14px;">${TYPE_LABEL[EX_LIBRARY[name].type]||''}</span>
           </label>`).join('')}
       </div>
     </div>
 
     <div style="display:flex;gap:10px;">
-      <button class="btn btn-ghost" style="flex:.4;" onclick="renderOnboarding(3)">← Voltar</button>
-      <button class="btn btn-dark" style="flex:1;" onclick="obNext4gym()">Continuar →</button>
+      <button class="btn btn-ghost" style="flex:.4;" onclick="renderOnboarding(3)">&larr; Voltar</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="obNext4gym()">Continuar &rarr;</button>
     </div>
   </div>`;
 }
@@ -899,32 +937,32 @@ function obStep5weights() {
   return `<div class="ob-step fade-in pt-safe">
     ${obProgress(5)}
     <div style="margin-bottom:24px;">
-      <p style="font-size:13px;color:var(--muted);font-weight:500;margin-bottom:8px;">PASSO 5 DE 6</p>
-      <h1 style="font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-bottom:10px;">Seus pesos<br>estimados. 🧮</h1>
-      <p style="color:var(--subtle);font-size:15px;line-height:1.6;">Calculamos pesos iniciais baseados no seu perfil. <strong>Sao estimativas</strong> — voce vai confirmar e ajustar na academia.</p>
+      <p style="font-size:13px;color:var(--text3);font-weight:500;margin-bottom:8px;">PASSO 5 DE 6</p>
+      <h1 style="font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-bottom:10px;">Seus pesos<br>estimados.</h1>
+      <p style="color:var(--text2);font-size:15px;line-height:1.6;">Calculamos pesos iniciais baseados no seu perfil. <strong>Sao estimativas</strong> — voce vai confirmar e ajustar na academia.</p>
     </div>
 
     <div class="card" style="margin-bottom:16px;">
       <div style="padding:14px 16px 8px;border-bottom:1px solid var(--border);">
         <p style="font-size:14px;font-weight:700;">Treino A — preview</p>
-        <p style="color:var(--muted);font-size:12px;margin-top:2px;">${exList.length} exercicios · estimativa ${OB.level==='beg'?'iniciante':OB.level==='adv'?'avancado':'intermediario'}</p>
+        <p style="color:var(--text3);font-size:12px;margin-top:2px;">${exList.length} exercicios · estimativa ${OB.level==='beg'?'iniciante':OB.level==='adv'?'avancado':'intermediario'}</p>
       </div>
       ${exList.map(ex=>`
         <div class="wt-row" style="padding:10px 16px;">
-          <span style="font-size:15px;">${TYPE_EMOJI[ex.type]||'💪'}</span>
+          <span style="font-size:15px;">${TYPE_LABEL[ex.type]||''}</span>
           <p style="flex:1;font-size:13px;font-weight:500;">${ex.name}</p>
-          <span class="chip chip-accent">${wLabel(ex)}</span>
+          <span class="badge badge-neutral">${wLabel(ex)}</span>
         </div>`).join('')}
     </div>
 
-    <div class="card-flat" style="margin-bottom:24px;background:var(--orange-light);border-color:var(--orange-light);">
-      <p style="font-size:13px;font-weight:600;color:var(--orange);margin-bottom:4px;">⚠ Importante — primeira sessao</p>
-      <p style="font-size:13px;color:var(--orange);line-height:1.6;">Na sua primeira vez em cada maquina, teste o peso sugerido. Se fizer mais de 18 reps com facilidade, o app sobe automaticamente. Se nao conseguir 8, o app desce.</p>
+    <div class="card-inset" style="margin-bottom:24px;background:var(--amber-dim);border-color:var(--amber-dim);">
+      <p style="font-size:13px;font-weight:600;color:var(--amber);margin-bottom:4px;">! Importante — primeira sessao</p>
+      <p style="font-size:13px;color:var(--amber);line-height:1.6;">Na sua primeira vez em cada maquina, teste o peso sugerido. Se fizer mais de 18 reps com facilidade, o app sobe automaticamente. Se nao conseguir 8, o app desce.</p>
     </div>
 
     <div style="display:flex;gap:10px;">
-      <button class="btn btn-ghost" style="flex:.4;" onclick="renderOnboarding(4)">← Voltar</button>
-      <button class="btn btn-dark" style="flex:1;" onclick="renderOnboarding(6)">Parece bom →</button>
+      <button class="btn btn-ghost" style="flex:.4;" onclick="renderOnboarding(4)">&larr; Voltar</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="renderOnboarding(6)">Parece bom &rarr;</button>
     </div>
   </div>`;
 }
@@ -935,9 +973,9 @@ function obStep6confirm() {
   return `<div class="ob-step fade-in pt-safe">
     ${obProgress(6)}
     <div style="margin-bottom:28px;">
-      <p style="font-size:13px;color:var(--muted);font-weight:500;margin-bottom:8px;">PASSO 6 DE 6</p>
-      <h1 style="font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-bottom:10px;">Tudo pronto,<br>${OB.name}! 🚀</h1>
-      <p style="color:var(--subtle);font-size:15px;line-height:1.6;">Confirme seu plano antes de comecar.</p>
+      <p style="font-size:13px;color:var(--text3);font-weight:500;margin-bottom:8px;">PASSO 6 DE 6</p>
+      <h1 style="font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-bottom:10px;">Tudo pronto,<br>${OB.name}!</h1>
+      <p style="color:var(--text2);font-size:15px;line-height:1.6;">Confirme seu plano antes de comecar.</p>
     </div>
 
     <div class="card" style="margin-bottom:14px;">
@@ -946,24 +984,24 @@ function obStep6confirm() {
         ['🎯','Nivel',`${OB.level==='beg'?'Iniciante':OB.level==='adv'?'Avancado':'Intermediario'} · ${OB.focus==='full'?'Full Body':OB.focus==='upper'?'Upper Body':'Lower Body'}`],
         ['📅','Agenda',`${numDays} dias/semana: ${OB.selectedDays.map(d=>DAY_NAMES[d]).join(', ')}`],
         ['🏋️','Academia',`${OB.gymMode==='manual'?'Equipamentos selecionados manualmente':'Lista padrao Genesis + Precor'}`],
-        ['💪','Treinos',`${numDays} treinos diferentes (${WORKOUT_KEYS.slice(0,numDays).join(', ')})`],
+        ['','Treinos',`${numDays} treinos diferentes (${WORKOUT_KEYS.slice(0,numDays).join(', ')})`],
       ].map(([ic,label,val])=>`
         <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);">
           <span style="font-size:20px;">${ic}</span>
           <div>
-            <p style="font-size:11px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.06em;">${label}</p>
+            <p style="font-size:11px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.06em;">${label}</p>
             <p style="font-size:14px;font-weight:600;margin-top:2px;">${val}</p>
           </div>
         </div>`).join('')}
     </div>
 
-    <div class="card-flat" style="margin-bottom:24px;background:var(--green-light);border-color:var(--green-light);">
-      <p style="font-size:13px;color:var(--green);line-height:1.6;">✅ Seus pesos serao ajustados automaticamente apos cada sessao com base nas suas reps. Quanto mais voce treinar, mais preciso fica.</p>
+    <div class="card-inset" style="margin-bottom:24px;background:var(--lime-dim);border-color:var(--lime-dim);">
+      <p style="font-size:13px;color:var(--lime);line-height:1.6;"> Seus pesos serao ajustados automaticamente apos cada sessao com base nas suas reps. Quanto mais voce treinar, mais preciso fica.</p>
     </div>
 
     <div style="display:flex;gap:10px;">
-      <button class="btn btn-ghost" style="flex:.4;" onclick="renderOnboarding(5)">← Voltar</button>
-      <button class="btn btn-green" style="flex:1;" onclick="obFinish()">Comecar a treinar! 💪</button>
+      <button class="btn btn-ghost" style="flex:.4;" onclick="renderOnboarding(5)">&larr; Voltar</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="obFinish()">Comecar a treinar!</button>
     </div>
   </div>`;
 }
@@ -1013,10 +1051,10 @@ function renderDashboard(tab) {
     <div class="px pt-safe" style="padding-bottom:16px;">
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <div>
-          <p style="color:var(--muted);font-size:13px;font-weight:500;">Ola, ${u.name} 👋</p>
+          <p style="color:var(--text3);font-size:13px;font-weight:500;">Ola, ${u.name}</p>
           <p style="font-size:22px;font-weight:800;letter-spacing:-.02em;margin-top:1px;">${DAY_NAMES[today]}</p>
         </div>
-        ${streak>0?`<div style="background:var(--orange-light);border-radius:24px;padding:8px 14px;display:flex;align-items:center;gap:6px;"><span style="font-size:16px;">🔥</span><span style="font-size:14px;font-weight:700;color:var(--orange);">${streak} dias</span></div>`:''}
+        ${streak>0?`<div style="background:var(--surface2);border:1px solid var(--border-strong);border-radius:8px;padding:6px 12px;display:flex;align-items:center;gap:6px;"><span style="font-size:10px;font-weight:700;color:var(--amber);letter-spacing:.06em;">STREAK</span><span style="font-size:14px;font-weight:800;color:var(--text);">${streak}</span></div>`:''}
       </div>
     </div>
     <div class="px" style="padding-bottom:80px;">${content}</div>
@@ -1031,22 +1069,22 @@ function homeTab(u,scheduled,streak,weekCount,lastLog,today,schedMap) {
   return `
     ${scheduled?`
     <div class="hero-card" style="margin-bottom:14px;">
-      <p style="font-size:12px;font-weight:600;opacity:.7;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;">Treino de hoje</p>
-      <p style="font-size:40px;font-weight:800;letter-spacing:-.03em;margin-bottom:2px;">Treino ${scheduled}</p>
-      <p style="font-size:13px;opacity:.75;margin-bottom:20px;">${u.sessionTime||45} min · ${exCount} exercicios · ${u.focus==='upper'?'Upper Body':u.focus==='lower'?'Lower Body':'Full Body'}</p>
-      <button onclick="startWorkout('${scheduled}')" style="background:#fff;color:var(--accent);border:none;border-radius:12px;padding:14px 0;width:100%;font-size:16px;font-weight:700;cursor:pointer;">Iniciar treino →</button>
+      <p class="label" style="margin-bottom:10px;">Treino de hoje</p>
+      <p style="font-size:44px;font-weight:800;letter-spacing:-.04em;line-height:1;margin-bottom:6px;color:var(--lime);">Treino ${scheduled}</p>
+      <p style="color:var(--text2);font-size:13px;margin-bottom:22px;">${u.sessionTime||45} min &nbsp;&middot;&nbsp; ${exCount} exercicios &nbsp;&middot;&nbsp; ${u.focus==='upper'?'Upper Body':u.focus==='lower'?'Lower Body':'Full Body'}</p>
+      <button class="btn btn-primary" onclick="startWorkout('${scheduled}')">Iniciar treino</button>
     </div>
     <button onclick="pickWorkout()" class="btn btn-ghost" style="margin-bottom:14px;font-size:14px;">Escolher treino diferente</button>
     `:`
     <div class="card-sm" style="margin-bottom:14px;">
-      <p style="font-weight:800;font-size:18px;margin-bottom:4px;">Dia de descanso 😴</p>
-      <p style="color:var(--subtle);font-size:13px;margin-bottom:16px;">Recuperacao e crescimento acontecem agora.</p>
-      <button onclick="pickWorkout()" class="btn btn-dark" style="font-size:15px;">Treinar mesmo assim</button>
+      <p style="font-weight:800;font-size:18px;margin-bottom:4px;">Dia de descanso</p>
+      <p style="color:var(--text2);font-size:13px;margin-bottom:16px;">Recuperacao e crescimento acontecem agora.</p>
+      <button onclick="pickWorkout()" class="btn btn-primary" style="font-size:15px;">Treinar mesmo assim</button>
     </div>`}
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
-      <div class="stat-box"><p class="label" style="margin-bottom:6px;">Sequencia</p><p style="font-size:28px;font-weight:800;">${streak}<span style="font-size:13px;color:var(--muted);font-weight:400;"> dias</span></p></div>
-      <div class="stat-box"><p class="label" style="margin-bottom:6px;">Semana</p><p style="font-size:28px;font-weight:800;">${weekCount}<span style="font-size:13px;color:var(--muted);font-weight:400;"> / ${u.trainDays}</span></p></div>
+      <div class="stat-box"><p class="label" style="margin-bottom:6px;">Sequencia</p><p style="font-size:28px;font-weight:800;">${streak}<span style="font-size:13px;color:var(--text3);font-weight:400;"> dias</span></p></div>
+      <div class="stat-box"><p class="label" style="margin-bottom:6px;">Semana</p><p style="font-size:28px;font-weight:800;">${weekCount}<span style="font-size:13px;color:var(--text3);font-weight:400;"> / ${u.trainDays}</span></p></div>
     </div>
 
     <div class="card-sm" style="margin-bottom:14px;">
@@ -1055,8 +1093,8 @@ function homeTab(u,scheduled,streak,weekCount,lastLog,today,schedMap) {
         ${DAY_SHORT.map((d,i)=>{
           const isToday=i===today, wKey=schedMap[i];
           return `<div style="flex:1;aspect-ratio:1;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
-            background:${isToday?'var(--accent)':wKey?'var(--accent-light)':'var(--card2)'};
-            color:${isToday?'#fff':wKey?'var(--accent)':'var(--muted)'};">
+            background:${isToday?'var(--lime)':wKey?'var(--lime-dim)':'var(--surface2)'};
+            color:${isToday?'#fff':wKey?'var(--lime)':'var(--text3)'};">
             <span style="font-size:11px;font-weight:700;">${d}</span>
             ${wKey?`<span style="font-size:9px;opacity:.75;">${wKey}</span>`:''}
           </div>`;
@@ -1070,9 +1108,9 @@ function homeTab(u,scheduled,streak,weekCount,lastLog,today,schedMap) {
         <div>
           <p class="label" style="margin-bottom:4px;">Ultimo treino</p>
           <p style="font-size:16px;font-weight:700;">Treino ${lastLog.workout}</p>
-          <p style="color:var(--muted);font-size:12px;margin-top:2px;">${fmt(lastLog.date)} · ${(lastLog.exercises||[]).length} exercicios</p>
+          <p style="color:var(--text3);font-size:12px;margin-top:2px;">${fmt(lastLog.date)} · ${(lastLog.exercises||[]).length} exercicios</p>
         </div>
-        <span style="color:var(--muted);font-size:22px;">›</span>
+        <span style="color:var(--text3);font-size:22px;">›</span>
       </div>
     </div>`:''}`;
 }
@@ -1086,13 +1124,13 @@ window.pickWorkout=function(){
   ov.innerHTML=`<div class="sheet">
     <div class="sheet-handle"></div>
     <p style="font-size:20px;font-weight:800;margin-bottom:4px;">Qual treino hoje?</p>
-    <p style="color:var(--subtle);font-size:13px;margin-bottom:20px;">Escolha o treino que vai fazer agora</p>
+    <p style="color:var(--text2);font-size:13px;margin-bottom:20px;">Escolha o treino que vai fazer agora</p>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
       ${keys.map(k=>`
         <button onclick="closePick();startWorkout('${k}')"
-          style="flex:1;min-width:60px;padding:20px 8px;background:var(--accent-light);border:2px solid var(--accent-light);border-radius:16px;cursor:pointer;text-align:center;">
-          <p style="font-size:28px;font-weight:800;color:var(--accent);">${k}</p>
-          <p style="color:var(--accent);font-size:11px;opacity:.7;margin-top:4px;">${(wk[k]||[]).length} ex.</p>
+          style="flex:1;min-width:60px;padding:20px 8px;background:var(--lime-dim);border:2px solid var(--lime-dim);border-radius:16px;cursor:pointer;text-align:center;">
+          <p style="font-size:28px;font-weight:800;color:var(--lime);">${k}</p>
+          <p style="color:var(--lime);font-size:11px;opacity:.7;margin-top:4px;">${(wk[k]||[]).length} ex.</p>
         </button>`).join('')}
     </div>
     <button class="btn btn-ghost" onclick="closePick()">Cancelar</button>
@@ -1104,17 +1142,17 @@ window.closePick=()=>$('pick-ov')?.remove();
 
 // ── History Tab ───────────────────────────────────────────────────────────
 function historyTab(logs) {
-  if(!logs.length) return `<div style="text-align:center;padding:60px 20px;"><p style="font-size:48px;margin-bottom:12px;">📋</p><p style="font-size:17px;font-weight:700;margin-bottom:6px;">Nenhum treino ainda</p><p style="color:var(--subtle);font-size:14px;">Faca seu primeiro treino!</p></div>`;
+  if(!logs.length) return `<div style="text-align:center;padding:60px 20px;"><p style="font-size:48px;margin-bottom:12px;">📋</p><p style="font-size:17px;font-weight:700;margin-bottom:6px;">Nenhum treino ainda</p><p style="color:var(--text2);font-size:14px;">Faca seu primeiro treino!</p></div>`;
   return `<div class="card">
     <div style="padding:16px 16px 0;"><p class="label">Ultimos treinos</p></div>
     ${[...logs].reverse().slice(0,30).map(l=>`
       <div onclick="showLog('${l.date}')" style="display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;gap:12px;">
-        <div style="width:42px;height:42px;background:var(--accent-light);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:var(--accent);flex-shrink:0;">${l.workout}</div>
+        <div style="width:42px;height:42px;background:var(--lime-dim);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:var(--lime);flex-shrink:0;">${l.workout}</div>
         <div style="flex:1;">
           <p style="font-size:15px;font-weight:600;">Treino ${l.workout}</p>
-          <p style="color:var(--muted);font-size:12px;margin-top:2px;">${fmt(l.date)} · ${(l.exercises||[]).length} ex.</p>
+          <p style="color:var(--text3);font-size:12px;margin-top:2px;">${fmt(l.date)} · ${(l.exercises||[]).length} ex.</p>
         </div>
-        <span style="color:var(--muted);font-size:20px;">›</span>
+        <span style="color:var(--text3);font-size:20px;">›</span>
       </div>`).join('')}
   </div>`;
 }
@@ -1125,18 +1163,18 @@ window.showLog=function(dateStr){
   app.innerHTML=`
   <div class="fade-in px pt-safe" style="padding-bottom:80px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
-      <button onclick="renderDashboard('history')" style="width:38px;height:38px;border-radius:50%;background:var(--card);border:1.5px solid var(--border);color:var(--subtle);font-size:18px;cursor:pointer;">&#8592;</button>
-      <div><p style="font-size:20px;font-weight:800;">Treino ${log.workout}</p><p style="color:var(--muted);font-size:13px;">${fmt(log.date)}</p></div>
+      <button onclick="renderDashboard('history')" style="width:38px;height:38px;border-radius:50%;background:var(--surface);border:1.5px solid var(--border);color:var(--text2);font-size:18px;cursor:pointer;">&#8592;</button>
+      <div><p style="font-size:20px;font-weight:800;">Treino ${log.workout}</p><p style="color:var(--text3);font-size:13px;">${fmt(log.date)}</p></div>
     </div>
     <div class="card">
       ${(log.exercises||[]).map(ex=>`
         <div style="padding:14px 16px;border-bottom:1px solid var(--border);">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
             <p style="font-size:14px;font-weight:700;">${ex.name}</p>
-            <span class="chip chip-accent">${wLabel(ex)}</span>
+            <span class="badge badge-neutral">${wLabel(ex)}</span>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            ${ex.reps.map((r,j)=>`<span style="background:var(--green-light);color:var(--green);border-radius:8px;padding:4px 10px;font-size:13px;font-weight:600;">S${j+1}: ${r}</span>`).join('')}
+            ${ex.reps.map((r,j)=>`<span style="background:var(--lime-dim);color:var(--lime);border-radius:8px;padding:4px 10px;font-size:13px;font-weight:600;">S${j+1}: ${r}</span>`).join('')}
           </div>
         </div>`).join('')}
     </div>
@@ -1152,20 +1190,20 @@ function weightsTab(u, schedMap) {
       <div class="card">
         <div style="padding:14px 16px 4px;border-bottom:1px solid var(--border);">
           <p style="font-size:16px;font-weight:800;">Treino ${key}</p>
-          <p style="color:var(--muted);font-size:12px;margin-top:2px;">${Object.entries(schedMap).filter(([,v])=>v===key).map(([d])=>DAY_NAMES[d]).join(', ')||'—'}</p>
+          <p style="color:var(--text3);font-size:12px;margin-top:2px;">${Object.entries(schedMap).filter(([,v])=>v===key).map(([d])=>DAY_NAMES[d]).join(', ')||'—'}</p>
         </div>
         ${wk[key].map((ex,i)=>{
           const sug=getSuggestion(ex.name,ex.type,ex.weight);
           return `
           <div style="display:flex;align-items:center;padding:11px 16px;border-bottom:1px solid var(--border);gap:10px;">
-            <span style="font-size:18px;flex-shrink:0;">${TYPE_EMOJI[ex.type]||'💪'}</span>
+            <span style="font-size:18px;flex-shrink:0;">${TYPE_LABEL[ex.type]||''}</span>
             <div style="flex:1;min-width:0;">
               <p style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${ex.name}</p>
-              ${ex.caution?`<p style="color:var(--orange);font-size:11px;margin-top:1px;">⚠ ${ex.caution}</p>`:''}
-              ${sug==='up'?`<span class="chip chip-green" style="margin-top:3px;font-size:11px;">Considere subir ↑</span>`:''}
+              ${ex.caution?`<p style="color:var(--amber);font-size:11px;margin-top:1px;">! ${ex.caution}</p>`:''}
+              ${sug==='up'?`<span class="badge badge-lime" style="margin-top:3px;font-size:11px;">Considere subir ↑</span>`:''}
             </div>
             <div style="display:flex;align-items:center;gap:6px;">
-              ${EX_INFO[ex.name]?`<button onclick="showExInfo('${ex.name.replace(/'/g,"\\'")}') " style="width:28px;height:28px;border-radius:50%;background:var(--accent-light);border:none;color:var(--accent);font-size:14px;font-weight:700;cursor:pointer;">ⓘ</button>`:''}
+              ${EX_INFO[ex.name]?`<button onclick="showExInfo('${ex.name.replace(/'/g,"\\'")}') " style="width:28px;height:28px;border-radius:50%;background:var(--lime-dim);border:none;color:var(--lime);font-size:14px;font-weight:700;cursor:pointer;">ⓘ</button>`:''}
               <button onclick="editWeight('${key}',${i})"
               style="padding:8px 14px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;">
               ${ex.weight>0?ex.weight+' '+ex.unit:'corpo'}
@@ -1182,18 +1220,18 @@ window.editWeight=function(key,i){
   const ov=document.createElement('div');ov.className='overlay fade-in';ov.id='ew-ov';
   ov.innerHTML=`<div class="sheet" style="text-align:center;">
     <div class="sheet-handle"></div>
-    <p style="font-size:13px;color:var(--subtle);margin-bottom:4px;">${ex.name}</p>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:4px;">${ex.name}</p>
     <div style="display:flex;align-items:baseline;justify-content:center;gap:6px;margin:16px 0 8px;">
       <input id="ew-v" type="number" step="2.5" min="0" value="${ex.weight}"
         style="font-size:52px;font-weight:800;background:transparent;border:none;color:var(--text);text-align:center;width:160px;outline:none;"/>
-      <span style="font-size:18px;color:var(--subtle);">${ex.unit}</span>
+      <span style="font-size:18px;color:var(--text2);">${ex.unit}</span>
     </div>
     <div style="display:flex;gap:8px;justify-content:center;margin-bottom:24px;">
-      ${[-5,-2.5,2.5,5].map(d=>`<button onclick="bumpEW(${d})" style="padding:9px 14px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;color:${d>0?'var(--accent)':'var(--subtle)'};font-size:13px;font-weight:600;cursor:pointer;">${d>0?'+':''}${d}</button>`).join('')}
+      ${[-5,-2.5,2.5,5].map(d=>`<button onclick="bumpEW(${d})" style="padding:9px 14px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;color:${d>0?'var(--lime)':'var(--text2)'};font-size:13px;font-weight:600;cursor:pointer;">${d>0?'+':''}${d}</button>`).join('')}
     </div>
     <div style="display:flex;gap:10px;">
       <button class="btn btn-ghost" style="flex:1;" onclick="$('ew-ov').remove()">Cancelar</button>
-      <button class="btn btn-dark" style="flex:1;" onclick="saveEW('${key}',${i})">Salvar</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="saveEW('${key}',${i})">Salvar</button>
     </div>
   </div>`;
   ov.onclick=e=>{if(e.target===ov)ov.remove();};
@@ -1228,23 +1266,23 @@ window.startWorkout=function(key){
     <div class="fade-in">
       <div class="px pt-safe" style="padding-bottom:12px;">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
-          <button onclick="goBack()" style="width:38px;height:38px;border-radius:50%;background:var(--card);border:1.5px solid var(--border);color:var(--subtle);font-size:18px;cursor:pointer;flex-shrink:0;">&#8592;</button>
+          <button onclick="goBack()" style="width:38px;height:38px;border-radius:50%;background:var(--surface);border:1.5px solid var(--border);color:var(--text2);font-size:18px;cursor:pointer;flex-shrink:0;">&#8592;</button>
           <div class="prog-bar" style="flex:1;"><div class="prog-fill" style="width:${prog}%;"></div></div>
-          <button onclick="showExList()" style="padding:6px 12px;background:var(--card);border:1.5px solid var(--border);border-radius:20px;color:var(--subtle);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">${cur+1}/${exercises.length} ☰</button>
+          <button onclick="showExList()" style="padding:6px 12px;background:var(--surface);border:1.5px solid var(--border);border-radius:20px;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">${cur+1}/${exercises.length} ☰</button>
         </div>
-        ${isFirstSession?`<div style="background:var(--orange-light);border-radius:10px;padding:8px 12px;"><p style="font-size:12px;color:var(--orange);font-weight:500;">🧪 Primeira sessao — teste os pesos e registre suas reps. O app vai ajustar automaticamente.</p></div>`:''}
+        ${isFirstSession?`<div style="background:var(--amber-dim);border-radius:10px;padding:8px 12px;"><p style="font-size:12px;color:var(--amber);font-weight:500;">🧪 Primeira sessao — teste os pesos e registre suas reps. O app vai ajustar automaticamente.</p></div>`:''}
       </div>
 
       <div class="px" style="padding-bottom:32px;">
         <div style="margin-bottom:22px;">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
-            <span class="chip chip-accent">Treino ${key}</span>
-            ${ex.caution?`<span class="chip chip-orange">⚠ ${ex.caution}</span>`:''}
+            <span class="badge badge-neutral">Treino ${key}</span>
+            ${ex.caution?`<span class="badge badge-amber">! ${ex.caution}</span>`:''}
           </div>
           <p style="font-size:28px;font-weight:800;letter-spacing:-.02em;line-height:1.15;margin-bottom:6px;">${ex.name}</p>
           <div style="display:flex;align-items:center;justify-content:space-between;">
-            <p style="color:var(--subtle);font-size:16px;font-weight:500;">${wLabel(ex)}</p>
-            ${EX_INFO[ex.name]?`<button onclick="showExInfo('${ex.name.replace(/'/g,"\\'")}') " style="width:28px;height:28px;border-radius:50%;background:var(--accent-light);border:none;color:var(--accent);font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0;">ⓘ</button>`:''}
+            <p style="color:var(--text2);font-size:16px;font-weight:500;">${wLabel(ex)}</p>
+            ${EX_INFO[ex.name]?`<button onclick="showExInfo('${ex.name.replace(/'/g,"\\'")}') " style="width:28px;height:28px;border-radius:50%;background:var(--lime-dim);border:none;color:var(--lime);font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0;">ⓘ</button>`:''}
           </div>
         </div>
 
@@ -1252,29 +1290,29 @@ window.startWorkout=function(key){
           ${[0,1,2].map(i=>{
             const done=reps[i]!==undefined, active=i===reps.length;
             return `<div class="set-row ${done?'done':active?'active':''}" onclick="${done?`editRepI(${i})`:''}" >
-              <div style="width:34px;height:34px;border-radius:10px;background:${done?'var(--green)':active?'var(--accent)':'var(--card2)'};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:${done||active?'#fff':'var(--muted)'};">S${i+1}</div>
+              <div style="width:34px;height:34px;border-radius:10px;background:${done?'var(--lime)':active?'var(--lime)':'var(--surface2)'};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:${done||active?'#fff':'var(--text3)'};">S${i+1}</div>
               <div style="flex:1;">
-                <p style="font-size:14px;font-weight:500;color:${done?'var(--green)':active?'var(--accent)':'var(--muted)'};">${done?reps[i]+' repeticoes':active?'Registrar agora':'Aguardando...'}</p>
+                <p style="font-size:14px;font-weight:500;color:${done?'var(--lime)':active?'var(--lime)':'var(--text3)'};">${done?reps[i]+' repeticoes':active?'Registrar agora':'Aguardando...'}</p>
               </div>
-              ${done?`<span style="color:var(--green);font-size:12px;font-weight:500;">editar</span>`:''}
+              ${done?`<span style="color:var(--lime);font-size:12px;font-weight:500;">editar</span>`:''}
             </div>`;
           }).join('')}
         </div>
 
         ${reps.length<3?`
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-            <p style="font-size:14px;font-weight:600;color:var(--subtle);">Serie ${reps.length+1} — quantas reps?</p>
-            <button onclick="openAutoCount()" style="padding:6px 12px;background:var(--accent-light);border:none;border-radius:20px;color:var(--accent);font-size:12px;font-weight:700;cursor:pointer;">📱 Auto</button>
+            <p style="font-size:14px;font-weight:600;color:var(--text2);">Serie ${reps.length+1} — quantas reps?</p>
+            <button onclick="openAutoCount()" style="padding:6px 12px;background:var(--lime-dim);border:none;border-radius:20px;color:var(--lime);font-size:12px;font-weight:700;cursor:pointer;">📱 Auto</button>
           </div>
           <div class="rep-grid" style="margin-bottom:10px;">
             ${[6,8,10,12,14,15,16,18,20,25].map(n=>`<button class="rep-btn" onclick="addSet(${n})">${n}</button>`).join('')}
           </div>
           <div style="display:flex;gap:8px;">
             <input id="cr" type="number" min="1" max="99" placeholder="outro" class="inp" style="text-align:center;flex:1;"/>
-            <button onclick="addCustom()" style="padding:14px 20px;background:var(--card);border:1.5px solid var(--border);border-radius:12px;color:var(--text);font-size:15px;font-weight:600;cursor:pointer;">OK</button>
+            <button onclick="addCustom()" style="padding:14px 20px;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;color:var(--text);font-size:15px;font-weight:600;cursor:pointer;">OK</button>
           </div>
         `:`
-          <button class="btn btn-dark" onclick="nextEx()" style="margin-bottom:10px;">${isLast?'Finalizar treino ✓':'Proximo exercicio →'}</button>
+          <button class="btn btn-primary" onclick="nextEx()" style="margin-bottom:10px;">${isLast?'Finalizar treino ✓':'Proximo exercicio &rarr;'}</button>
         `}
         <button class="btn btn-ghost" onclick="skipEx()" style="margin-top:10px;font-size:14px;">Pular este exercicio</button>
       </div>
@@ -1286,21 +1324,21 @@ window.startWorkout=function(key){
     ov.innerHTML=`<div class="sheet" style="max-height:85vh;overflow-y:auto;">
       <div class="sheet-handle"></div>
       <p style="font-size:18px;font-weight:800;margin-bottom:4px;">Treino ${key}</p>
-      <p style="color:var(--subtle);font-size:13px;margin-bottom:16px;">Toque para ir direto ao exercicio</p>
+      <p style="color:var(--text2);font-size:13px;margin-bottom:16px;">Toque para ir direto ao exercicio</p>
       ${exercises.map((ex,i)=>{
         const done=(sessionData[i]?.reps?.length||0)===3;
         const current=i===cur, started=(sessionData[i]?.reps?.length||0)>0;
         return `<div style="display:flex;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);gap:12px;">
-          <div style="width:36px;height:36px;border-radius:10px;background:${done?'var(--green-light)':current?'var(--accent)':started?'var(--accent-light)':'var(--bg)'};color:${done?'var(--green)':current?'#fff':'var(--accent)'};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;cursor:pointer;" onclick="jumpTo(${i})">
+          <div style="width:36px;height:36px;border-radius:10px;background:${done?'var(--lime-dim)':current?'var(--lime)':started?'var(--lime-dim)':'var(--bg)'};color:${done?'var(--lime)':current?'#fff':'var(--lime)'};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;cursor:pointer;" onclick="jumpTo(${i})">
             ${done?'✓':current?'▶':i+1}
           </div>
           <div style="flex:1;min-width:0;cursor:pointer;" onclick="jumpTo(${i})">
-            <p style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;${current?'color:var(--accent)':''}">${ex.name}</p>
-            <p style="color:var(--muted);font-size:12px;margin-top:1px;">${wLabel(ex)}</p>
+            <p style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;${current?'color:var(--lime)':''}">${ex.name}</p>
+            <p style="color:var(--text3);font-size:12px;margin-top:1px;">${wLabel(ex)}</p>
           </div>
           <div style="display:flex;align-items:center;gap:6px;">
-            ${done&&sessionData[i]?`<span class="chip chip-green" style="font-size:11px;">${sessionData[i].reps.join('/')}</span>`:''}
-            ${EX_INFO[ex.name]?`<button onclick="showExInfo('${ex.name.replace(/'/g,"\\'")}') " style="width:26px;height:26px;border-radius:50%;background:var(--accent-light);border:none;color:var(--accent);font-size:13px;font-weight:700;cursor:pointer;">ⓘ</button>`:''}
+            ${done&&sessionData[i]?`<span class="badge badge-lime" style="font-size:11px;">${sessionData[i].reps.join('/')}</span>`:''}
+            ${EX_INFO[ex.name]?`<button onclick="showExInfo('${ex.name.replace(/'/g,"\\'")}') " style="width:26px;height:26px;border-radius:50%;background:var(--lime-dim);border:none;color:var(--lime);font-size:13px;font-weight:700;cursor:pointer;">ⓘ</button>`:''}
           </div>
         </div>`;
       }).join('')}
@@ -1316,13 +1354,13 @@ window.startWorkout=function(key){
     const curReps=sessionData[cur]?.reps||[];
     ov.innerHTML=`<div class="sheet" style="text-align:center;">
       <div class="sheet-handle"></div>
-      <p style="color:var(--subtle);font-size:13px;margin-bottom:4px;">${exercises[cur].name}</p>
-      <p style="color:var(--muted);font-size:12px;margin-bottom:20px;">Serie ${si+1}</p>
+      <p style="color:var(--text2);font-size:13px;margin-bottom:4px;">${exercises[cur].name}</p>
+      <p style="color:var(--text3);font-size:12px;margin-bottom:20px;">Serie ${si+1}</p>
       <input id="er-v" type="number" min="1" max="99" value="${curReps[si]||''}"
         style="font-size:52px;font-weight:800;background:transparent;border:none;color:var(--text);text-align:center;width:100%;outline:none;margin-bottom:24px;"/>
       <div style="display:flex;gap:10px;">
         <button class="btn btn-ghost" style="flex:1;" onclick="$('er-ov').remove()">Cancelar</button>
-        <button class="btn btn-dark" style="flex:1;" onclick="saveEditRepI(${si})">Salvar</button>
+        <button class="btn btn-primary" style="flex:1;" onclick="saveEditRepI(${si})">Salvar</button>
       </div>
     </div>`;
     ov.onclick=e=>{if(e.target===ov)ov.remove();};
@@ -1355,13 +1393,13 @@ window.startWorkout=function(key){
 
     app.innerHTML=`
     <div class="fade-in px pt-safe" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding-bottom:40px;">
-      <div style="font-size:72px;margin-bottom:16px;animation:pop 0.6s ease;">🏆</div>
-      <p style="font-size:34px;font-weight:800;letter-spacing:-.03em;margin-bottom:6px;">Treino feito!</p>
-      <p style="color:var(--subtle);font-size:15px;margin-bottom:6px;">Treino ${key} · ${done.length} exercicios</p>
-      <p style="color:var(--orange);font-size:14px;font-weight:600;margin-bottom:${adjusted?'12px':'40px'};">🔥 ${S.streak()} dias seguidos</p>
-      ${adjusted?`<div style="background:var(--green-light);border-radius:12px;padding:12px 16px;margin-bottom:32px;max-width:320px;"><p style="color:var(--green);font-size:13px;font-weight:600;">✅ Pesos ajustados automaticamente com base nas suas reps de hoje!</p></div>`:''}
+      <div style="font-size:48px;font-weight:800;color:var(--lime);margin-bottom:16px;letter-spacing:-.04em;"></div>
+      <p style="font-size:34px;font-weight:800;letter-spacing:-.03em;margin-bottom:6px;">Treino concluido.</p>
+      <p style="color:var(--text2);font-size:15px;margin-bottom:6px;">Treino ${key} · ${done.length} exercicios</p>
+      <p style="color:var(--amber);font-size:14px;font-weight:600;margin-bottom:${adjusted?'12px':'40px'};">${S.streak()} dias seguidos</p>
+      ${adjusted?`<div style="background:var(--lime-dim);border:1px solid var(--lime-border);border-radius:10px;padding:12px 16px;margin-bottom:32px;max-width:320px;"><p style="color:var(--lime);font-size:13px;font-weight:600;">Pesos ajustados com base nas suas reps de hoje.</p></div>`:''}
       <div style="width:100%;max-width:320px;display:flex;flex-direction:column;gap:10px;">
-        <button class="btn btn-dark" onclick="renderDashboard()">Voltar ao inicio</button>
+        <button class="btn btn-primary" onclick="renderDashboard()">Voltar ao inicio</button>
         <button class="btn btn-ghost" onclick="renderDashboard('history')">Ver historico</button>
       </div>
     </div>`;
@@ -1391,29 +1429,29 @@ window.openAutoCount=function(){
   ov.innerHTML=`<div class="sheet" style="text-align:center;">
     <div class="sheet-handle"></div>
     <p style="font-size:20px;font-weight:800;margin-bottom:4px;">Contador automatico</p>
-    <p style="color:var(--subtle);font-size:13px;margin-bottom:10px;">Segure o celular no punho e faca o movimento completo</p>
-    ${exName?`<div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:16px;"><span class="chip chip-accent">${thr.profile}</span>${armCm?`<span class="chip" style="background:var(--card2);color:var(--subtle);">braco ~${armCm}cm</span>`:''}</div>`:''}
+    <p style="color:var(--text2);font-size:13px;margin-bottom:10px;">Segure o celular no punho e faca o movimento completo</p>
+    ${exName?`<div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:16px;"><span class="badge badge-neutral">${thr.profile}</span>${armCm?`<span class="badge badge-neutral" style="background:var(--surface2);color:var(--text2);">braco ~${armCm}cm</span>`:''}</div>`:''}
     <div style="position:relative;width:120px;height:120px;margin:0 auto 16px;">
       <svg width="120" height="120" style="position:absolute;top:0;left:0;transform:rotate(-90deg);">
-        <circle cx="60" cy="60" r="52" fill="none" stroke="var(--card2)" stroke-width="7"/>
-        <circle id="ac-ring" cx="60" cy="60" r="52" fill="none" stroke="var(--accent)" stroke-width="7" stroke-dasharray="327" stroke-dashoffset="327" stroke-linecap="round" style="transition:stroke-dashoffset .25s;"/>
+        <circle cx="60" cy="60" r="52" fill="none" stroke="var(--surface2)" stroke-width="7"/>
+        <circle id="ac-ring" cx="60" cy="60" r="52" fill="none" stroke="var(--lime)" stroke-width="7" stroke-dasharray="327" stroke-dashoffset="327" stroke-linecap="round" style="transition:stroke-dashoffset .25s;"/>
       </svg>
       <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;">
         <span id="ac-num" style="font-size:48px;font-weight:800;line-height:1;">0</span>
-        <span style="color:var(--muted);font-size:11px;">reps</span>
+        <span style="color:var(--text3);font-size:11px;">reps</span>
       </div>
     </div>
-    <div style="height:6px;background:var(--card2);border-radius:4px;margin-bottom:16px;overflow:hidden;position:relative;">
-      <div id="ac-level" style="height:100%;background:var(--accent);width:0%;border-radius:4px;transition:width .08s;"></div>
+    <div style="height:6px;background:var(--surface2);border-radius:4px;margin-bottom:16px;overflow:hidden;position:relative;">
+      <div id="ac-level" style="height:100%;background:var(--lime);width:0%;border-radius:4px;transition:width .08s;"></div>
     </div>
-    <p id="ac-status" style="color:var(--muted);font-size:13px;margin-bottom:20px;">Pressione Iniciar</p>
+    <p id="ac-status" style="color:var(--text3);font-size:13px;margin-bottom:20px;">Pressione Iniciar</p>
     <div style="display:flex;gap:10px;margin-bottom:10px;">
-      <button id="ac-go" class="btn btn-accent" onclick="acStart()">Iniciar</button>
+      <button id="ac-go" class="btn btn-primary" onclick="acStart()">Iniciar</button>
       <button id="ac-stop" class="btn btn-ghost" style="display:none;" onclick="acStop()">Parar</button>
     </div>
     <div style="display:flex;gap:10px;">
       <button class="btn btn-ghost" onclick="acCancel()">Cancelar</button>
-      <button id="ac-use" class="btn btn-dark" style="display:none;" onclick="acUse()">Usar resultado</button>
+      <button id="ac-use" class="btn btn-primary" style="display:none;" onclick="acUse()">Usar resultado</button>
     </div>
   </div>`;
   ov.onclick=e=>{if(e.target===ov)acCancel();};
@@ -1424,7 +1462,7 @@ window.acStart=function(){
   const thr=acState.thr;
   $('ac-go').style.display='none';$('ac-stop').style.display='block';
   $('ac-status').textContent='Movendo! Faca os movimentos completos...';
-  $('ac-status').style.color='var(--accent)';
+  $('ac-status').style.color='var(--lime)';
   function onMotion(e){
     if(!acState.active)return;
     const a=e.accelerationIncludingGravity||e.acceleration||{};
@@ -1440,7 +1478,7 @@ window.acStart=function(){
         clearTimeout(acState.cooldownTimer);
         acState.cooldownTimer=setTimeout(()=>{acState.cooldown=false;},thr.cooldown);
         const el=$('ac-num'),ring=$('ac-ring');
-        if(el){el.textContent=acState.reps;el.style.color='var(--green)';setTimeout(()=>{if(el)el.style.color='var(--text)';},300);}
+        if(el){el.textContent=acState.reps;el.style.color='var(--lime)';setTimeout(()=>{if(el)el.style.color='var(--text)';},300);}
         if(ring){ring.setAttribute('stroke-dashoffset',327-Math.min(acState.reps/20,1)*327);}
       }
     }
@@ -1453,7 +1491,7 @@ window.acStart=function(){
 window.acStop=function(){
   acState.active=false;if(acState.handler)window.removeEventListener('devicemotion',acState.handler);
   $('ac-stop').style.display='none';
-  $('ac-status').textContent=`${acState.reps} reps. Use ou cancele.`;$('ac-status').style.color='var(--subtle)';
+  $('ac-status').textContent=`${acState.reps} reps. Use ou cancele.`;$('ac-status').style.color='var(--text2)';
   const ub=$('ac-use');if(ub){ub.style.display='block';ub.textContent=`Usar ${acState.reps} reps`;}
   const lvl=$('ac-level');if(lvl)lvl.style.width='0%';
 };
@@ -1474,9 +1512,9 @@ window.renderProfile=function(){
 
     <!-- Avatar -->
     <div style="text-align:center;margin-bottom:24px;">
-      <div style="width:72px;height:72px;background:var(--accent);border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:#fff;margin:0 auto 10px;box-shadow:0 8px 24px rgba(91,79,255,.25);">${(u.name||'?').charAt(0).toUpperCase()}</div>
+      <div style="width:72px;height:72px;background:var(--lime);border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:#fff;margin:0 auto 10px;box-shadow:0 8px 24px rgba(91,79,255,.25);">${(u.name||'?').charAt(0).toUpperCase()}</div>
       <p style="font-size:20px;font-weight:800;">${u.name}</p>
-      <p style="color:var(--muted);font-size:13px;margin-top:2px;">${u.height}cm · ${u.weight}kg · ${u.level==='beg'?'Iniciante':u.level==='adv'?'Avancado':'Intermediario'}</p>
+      <p style="color:var(--text3);font-size:13px;margin-top:2px;">${u.height}cm · ${u.weight}kg · ${u.level==='beg'?'Iniciante':u.level==='adv'?'Avancado':'Intermediario'}</p>
     </div>
 
     <!-- Stats -->
@@ -1490,17 +1528,17 @@ window.renderProfile=function(){
     <div class="card" style="margin-bottom:12px;">
       <div style="padding:14px 16px 0;"><p class="label" style="margin-bottom:14px;">Editar perfil</p></div>
       <div style="padding:0 16px 16px;display:flex;flex-direction:column;gap:12px;">
-        <div><label style="display:block;color:var(--subtle);font-size:13px;font-weight:500;margin-bottom:6px;">Nome</label><input id="p_name" class="inp" value="${u.name}"/></div>
+        <div><label style="display:block;color:var(--text2);font-size:13px;font-weight:500;margin-bottom:6px;">Nome</label><input id="p_name" class="inp" value="${u.name}"/></div>
         <div style="display:flex;gap:10px;">
-          <div style="flex:1;"><label style="display:block;color:var(--subtle);font-size:13px;font-weight:500;margin-bottom:6px;">Altura (cm)</label><input id="p_height" class="inp" type="number" value="${u.height||175}" style="text-align:center;"/></div>
-          <div style="flex:1;"><label style="display:block;color:var(--subtle);font-size:13px;font-weight:500;margin-bottom:6px;">Peso (kg)</label><input id="p_weight" class="inp" type="number" value="${u.weight||80}" style="text-align:center;"/></div>
+          <div style="flex:1;"><label style="display:block;color:var(--text2);font-size:13px;font-weight:500;margin-bottom:6px;">Altura (cm)</label><input id="p_height" class="inp" type="number" value="${u.height||175}" style="text-align:center;"/></div>
+          <div style="flex:1;"><label style="display:block;color:var(--text2);font-size:13px;font-weight:500;margin-bottom:6px;">Peso (kg)</label><input id="p_weight" class="inp" type="number" value="${u.weight||80}" style="text-align:center;"/></div>
         </div>
-        <div><label style="display:block;color:var(--subtle);font-size:13px;font-weight:500;margin-bottom:6px;">Foco do treino</label>
+        <div><label style="display:block;color:var(--text2);font-size:13px;font-weight:500;margin-bottom:6px;">Foco do treino</label>
           <select id="p_focus" class="inp">
             ${[['full','Full Body'],['upper','Upper Body'],['lower','Lower Body']].map(([v,l])=>`<option value="${v}" ${u.focus===v?'selected':''}>${l}</option>`).join('')}
           </select>
         </div>
-        <button class="btn btn-dark" onclick="saveProfile()">Salvar alteracoes</button>
+        <button class="btn btn-primary" onclick="saveProfile()">Salvar alteracoes</button>
       </div>
     </div>
 
@@ -1508,22 +1546,22 @@ window.renderProfile=function(){
     <div class="card" style="margin-bottom:12px;">
       <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
         <p style="font-size:15px;font-weight:700;">Agenda de treinos</p>
-        <button onclick="editSchedule()" style="padding:6px 12px;background:var(--accent-light);border:none;border-radius:8px;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;">Editar</button>
+        <button onclick="editSchedule()" style="padding:6px 12px;background:var(--lime-dim);border:none;border-radius:8px;color:var(--lime);font-size:12px;font-weight:600;cursor:pointer;">Editar</button>
       </div>
       <div style="padding:12px 16px;">
         ${Object.entries(schedMap).sort(([a],[b])=>a-b).map(([d,k])=>`
           <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);">
-            <span style="font-size:14px;color:var(--subtle);">${DAY_NAMES[d]}</span>
+            <span style="font-size:14px;color:var(--text2);">${DAY_NAMES[d]}</span>
             <span style="font-size:14px;font-weight:700;">Treino ${k}</span>
           </div>`).join('')}
       </div>
     </div>
 
     <div class="card-sm" style="margin-bottom:10px;">
-      <button onclick="resetWk()" style="width:100%;padding:10px;background:transparent;border:none;color:var(--orange);font-size:14px;font-weight:600;cursor:pointer;text-align:left;">Resetar pesos para estimativa inicial</button>
+      <button onclick="resetWk()" style="width:100%;padding:10px;background:transparent;border:none;color:var(--amber);font-size:14px;font-weight:600;cursor:pointer;text-align:left;">Resetar pesos para estimativa inicial</button>
     </div>
     <div class="card-sm">
-      <button onclick="clearAll()" style="width:100%;padding:10px;background:transparent;border:none;color:var(--muted);font-size:14px;cursor:pointer;text-align:left;">Apagar todos os dados e recomecar</button>
+      <button onclick="clearAll()" style="width:100%;padding:10px;background:transparent;border:none;color:var(--text3);font-size:14px;cursor:pointer;text-align:left;">Apagar todos os dados e recomecar</button>
     </div>
   </div>
   ${bnav('profile')}`;
@@ -1546,17 +1584,17 @@ window.editSchedule=function(){
   ov.innerHTML=`<div class="sheet" style="max-height:85vh;overflow-y:auto;">
     <div class="sheet-handle"></div>
     <p style="font-size:18px;font-weight:800;margin-bottom:4px;">Editar agenda</p>
-    <p style="color:var(--subtle);font-size:13px;margin-bottom:16px;">Selecione os dias de treino</p>
+    <p style="color:var(--text2);font-size:13px;margin-bottom:16px;">Selecione os dias de treino</p>
     <div style="display:flex;gap:6px;margin-bottom:16px;">
       ${DAY_SHORT.map((d,i)=>`
         <div class="day-cell ${OB.selectedDays.includes(i)?'on':''}" onclick="toggleDay(${i})" id="dc_${i}">
-          <span style="font-size:12px;font-weight:700;color:${OB.selectedDays.includes(i)?'#fff':'var(--subtle)'};">${d}</span>
-          <span style="font-size:9px;color:${OB.selectedDays.includes(i)?'rgba(255,255,255,.7)':'var(--muted)'};" id="dc_lbl_${i}">${OB.selectedDays.includes(i)?WORKOUT_KEYS[OB.selectedDays.indexOf(i)]:''}</span>
+          <span style="font-size:12px;font-weight:700;color:${OB.selectedDays.includes(i)?'#fff':'var(--text2)'};">${d}</span>
+          <span style="font-size:9px;color:${OB.selectedDays.includes(i)?'rgba(255,255,255,.7)':'var(--text3)'};" id="dc_lbl_${i}">${OB.selectedDays.includes(i)?WORKOUT_KEYS[OB.selectedDays.indexOf(i)]:''}</span>
         </div>`).join('')}
     </div>
     <div style="display:flex;gap:10px;">
       <button class="btn btn-ghost" style="flex:1;" onclick="$('sched-ov').remove()">Cancelar</button>
-      <button class="btn btn-dark" style="flex:1;" onclick="saveSchedule()">Salvar</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="saveSchedule()">Salvar</button>
     </div>
   </div>`;
   ov.onclick=e=>{if(e.target===ov)ov.remove();};
@@ -1597,3 +1635,7 @@ window.clearAll=function(){
 </script>
 </body>
 </html>
+
+
+
+

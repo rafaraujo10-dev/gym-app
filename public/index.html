@@ -217,7 +217,18 @@ function renderOnboarding(){
 
     <div class="card" style="padding:24px;margin-bottom:14px;box-shadow:0 2px 16px rgba(0,0,0,.06);">
       <label style="display:block;color:var(--subtle);font-size:13px;font-weight:500;margin-bottom:8px;">Seu nome</label>
-      <input id="ob_name" class="inp" type="text" placeholder="Ex: Rafael" style="margin-bottom:22px;" autocomplete="given-name"/>
+      <input id="ob_name" class="inp" type="text" placeholder="Ex: Rafael" style="margin-bottom:16px;" autocomplete="given-name"/>
+
+      <div style="display:flex;gap:10px;margin-bottom:22px;">
+        <div style="flex:1;">
+          <label style="display:block;color:var(--subtle);font-size:13px;font-weight:500;margin-bottom:8px;">Altura (cm)</label>
+          <input id="ob_height" class="inp" type="number" min="140" max="220" placeholder="175" style="text-align:center;"/>
+        </div>
+        <div style="flex:1;">
+          <label style="display:block;color:var(--subtle);font-size:13px;font-weight:500;margin-bottom:8px;">Peso (kg)</label>
+          <input id="ob_weight" class="inp" type="number" min="40" max="200" placeholder="80" style="text-align:center;"/>
+        </div>
+      </div>
 
       <label style="display:block;color:var(--subtle);font-size:13px;font-weight:500;margin-bottom:10px;">Dias de treino por semana</label>
       <div style="display:flex;gap:8px;margin-bottom:22px;" id="days-row">
@@ -259,7 +270,9 @@ window.selTime=function(v){
 window.saveOnboarding=function(){
   const name=$('ob_name').value.trim();
   if(!name){$('ob_name').focus();return;}
-  S.set('ga_user',{name,trainDays:window._ob_days||3,sessionTime:window._ob_time||'45'});
+  const height=parseInt($('ob_height').value)||175;
+  const weight=parseInt($('ob_weight').value)||80;
+  S.set('ga_user',{name,trainDays:window._ob_days||3,sessionTime:window._ob_time||'45',height,weight});
   renderDashboard();
 };
 
@@ -660,28 +673,99 @@ window.startWorkout=function(key){
   render();
 };
 
-// ─── AUTO REP COUNTER — CYCLE DETECTION ──────────────────────────────────────
-// Strategy: detect full rep cycle using zero-crossing on smoothed acceleration.
-// A rep = signal goes from low → high → low (one full movement cycle).
-// Cooldown prevents double-counting on the same motion.
+// ─── AUTO REP COUNTER — BODY-AWARE CYCLE DETECTION ───────────────────────────
+// Thresholds are calibrated per person using height-based arm length estimation.
+// Taller person = longer arm = larger acceleration arc = lower threshold needed.
+// Each exercise type has a movement profile (short arc vs long arc).
+//
+// Arm length ≈ height × 0.36  (shoulder to wrist, cm)
+// Forearm    ≈ height × 0.146 (elbow to wrist, cm)
+//
+// Exercise movement profiles:
+//   'curl'     → forearm arc only (short) — biceps, triceps
+//   'press'    → full arm push (medium)   — chest press, shoulder
+//   'pull'     → full arm pull (long)     — pulldown, row, lat
+//   'leg'      → leg extension/curl       — use torso/hip motion
+//   'core'     → sit-up                   — torso flex
 
-let acState={active:false,handler:null,reps:0,phase:'rest',smoothed:0,cooldown:false,cooldownTimer:null};
-const AC_ALPHA=0.3;     // smoothing factor (lower = smoother)
-const AC_UP_THR=14;     // threshold to enter "up" phase (m/s²)
-const AC_DOWN_THR=9;    // threshold to return to "rest" phase
-const AC_COOLDOWN_MS=400; // minimum time between reps
+const EX_PROFILES = {
+  'Genesis Biceps':              'curl',
+  'Genesis Biceps Preacher':     'curl',
+  'Genesis Triceps':             'curl',
+  'Genesis Triceps Seated':      'curl',
+  'Genesis Multiplane Chest':    'press',
+  'Genesis Multiplane Shoulder': 'press',
+  'Dumbbell Bench Press':        'press',
+  'Genesis Chin / Dip Assist':   'press',
+  'Precor Pulldown 304':         'pull',
+  'Genesis Lat':                 'pull',
+  'Precor Low Row':              'pull',
+  'Precor Seated Row':           'pull',
+  'Genesis Dual Cable':          'pull',
+  'Leg Extension':               'leg',
+  'Leg Curl':                    'leg',
+  'Prone Leg Curl':              'leg',
+  'Inner Thigh':                 'leg',
+  'Outer Thigh':                 'leg',
+  'Genesis Total Quad / Hip':    'leg',
+  'Genesis Total Glute / Ham':   'leg',
+  'Genesis Multiplane Calf':     'leg',
+  'Decline Sit-up':              'core',
+};
+
+// Returns {upThr, downThr, cooldown} calibrated for this person + exercise
+function getACThresholds(exName) {
+  const u = S.user();
+  const height = u?.height || 175; // cm
+  // Arm length ratio: taller = longer lever = more acceleration range
+  // Base thresholds tuned for 175cm. Scale inversely with arm length.
+  const armRatio = 175 / height; // >1 for short people, <1 for tall
+  const profile = EX_PROFILES[exName] || 'pull';
+
+  // Base thresholds per movement type (tuned empirically)
+  const bases = {
+    curl:  { up: 13, down: 8,  cooldown: 350 },
+    press: { up: 11, down: 7,  cooldown: 400 },
+    pull:  { up: 10, down: 6.5,cooldown: 450 }, // longest arc, lowest threshold
+    leg:   { up: 9,  down: 5.5,cooldown: 500 },
+    core:  { up: 8,  down: 5,  cooldown: 600 },
+  };
+  const b = bases[profile];
+  return {
+    upThr:    +(b.up   * armRatio).toFixed(1),
+    downThr:  +(b.down * armRatio).toFixed(1),
+    cooldown: b.cooldown,
+    profile,
+  };
+}
+
+let acState={active:false,handler:null,reps:0,phase:'rest',smoothed:0,cooldown:false,cooldownTimer:null,thr:null,exName:''};
+const AC_ALPHA=0.25; // smoothing (lower = smoother, less noise)
 
 window.openAutoCount=function(){
-  acState={active:false,handler:null,reps:0,phase:'rest',smoothed:0,cooldown:false,cooldownTimer:null};
+  // Get current exercise name from workout context
+  const exName = (typeof exercises !== 'undefined' && typeof cur !== 'undefined')
+    ? exercises[cur]?.name || '' : '';
+  const thr = getACThresholds(exName);
+  const u = S.user();
+  const armCm = u?.height ? Math.round(u.height * 0.36) : null;
+
+  acState={active:false,handler:null,reps:0,phase:'rest',smoothed:0,cooldown:false,cooldownTimer:null,thr,exName};
   const ov=document.createElement('div');
   ov.className='overlay fade-in';ov.id='ac-ov';
   ov.innerHTML=`
   <div class="sheet" style="text-align:center;box-shadow:0 -4px 32px rgba(0,0,0,.12);">
     <div class="sheet-handle"></div>
     <p style="font-size:20px;font-weight:800;margin-bottom:4px;">Contador automatico</p>
-    <p style="color:var(--subtle);font-size:13px;margin-bottom:24px;">Segure o celular firmemente no braco<br>e faca o movimento completo (ida + volta = 1 rep)</p>
+    <p style="color:var(--subtle);font-size:13px;margin-bottom:6px;">Segure o celular firmemente no punho<br>e faca o movimento completo (ida + volta = 1 rep)</p>
+    ${exName ? `
+    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;">
+      <span class="chip chip-accent">${thr.profile}</span>
+      ${armCm ? `<span class="chip" style="background:var(--card2);color:var(--subtle);">braco ~${armCm}cm</span>` : ''}
+      <span class="chip" style="background:var(--card2);color:var(--subtle);">thr ${thr.upThr}/${thr.downThr}</span>
+    </div>` : ''}
 
-    <div style="position:relative;width:130px;height:130px;margin:0 auto 24px;">
+    <div style="position:relative;width:130px;height:130px;margin:0 auto 20px;">
       <svg width="130" height="130" style="position:absolute;top:0;left:0;transform:rotate(-90deg);">
         <circle cx="65" cy="65" r="56" fill="none" stroke="var(--card2)" stroke-width="7"/>
         <circle id="ac-ring" cx="65" cy="65" r="56" fill="none" stroke="var(--accent)" stroke-width="7"
@@ -693,8 +777,19 @@ window.openAutoCount=function(){
       </div>
     </div>
 
-    <div id="ac-bar" style="height:4px;background:var(--card2);border-radius:4px;margin-bottom:20px;overflow:hidden;">
-      <div id="ac-level" style="height:100%;background:var(--accent);width:0%;border-radius:4px;transition:width .1s;"></div>
+    <!-- Live signal bar -->
+    <div style="margin-bottom:6px;">
+      <div style="height:6px;background:var(--card2);border-radius:4px;overflow:hidden;position:relative;">
+        <div id="ac-level" style="height:100%;background:var(--accent);width:0%;border-radius:4px;transition:width .08s;"></div>
+        <!-- threshold markers -->
+        <div style="position:absolute;top:0;bottom:0;width:2px;background:var(--green);opacity:.6;left:${Math.min(thr.upThr/25*100,100)}%;"></div>
+        <div style="position:absolute;top:0;bottom:0;width:2px;background:var(--orange);opacity:.6;left:${Math.min(thr.downThr/25*100,100)}%;"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:4px;">
+        <span style="color:var(--muted);font-size:10px;">repouso</span>
+        <span style="color:var(--green);font-size:10px;">↑ ativa rep</span>
+        <span style="color:var(--muted);font-size:10px;">max</span>
+      </div>
     </div>
 
     <p id="ac-status" style="color:var(--muted);font-size:13px;margin-bottom:20px;">Pressione Iniciar e comece a se mover</p>
@@ -714,6 +809,7 @@ window.openAutoCount=function(){
 
 window.acStart=function(){
   acState.active=true;acState.reps=0;acState.phase='rest';acState.smoothed=0;
+  const thr=acState.thr;
   $('ac-go').style.display='none';$('ac-stop').style.display='block';
   $('ac-status').textContent='Movendo! Faca os movimentos completos...';
   $('ac-status').style.color='var(--accent)';
@@ -722,25 +818,23 @@ window.acStart=function(){
     if(!acState.active)return;
     const a=e.accelerationIncludingGravity||e.acceleration||{};
     const raw=Math.sqrt((a.x||0)**2+(a.y||0)**2+(a.z||0)**2);
-    // Exponential moving average
     acState.smoothed=AC_ALPHA*raw+(1-AC_ALPHA)*acState.smoothed;
     const mag=acState.smoothed;
 
-    // Live bar
+    // Live bar (scale to 25 m/s² max)
     const lvl=$('ac-level');
     if(lvl) lvl.style.width=Math.min(100,mag/25*100)+'%';
 
-    // Cycle detection: rest → active → rest = 1 rep
-    if(acState.phase==='rest' && mag>AC_UP_THR && !acState.cooldown){
+    // Cycle detection using calibrated thresholds
+    if(acState.phase==='rest' && mag>thr.upThr && !acState.cooldown){
       acState.phase='active';
-    } else if(acState.phase==='active' && mag<AC_DOWN_THR){
+    } else if(acState.phase==='active' && mag<thr.downThr){
       acState.phase='rest';
       if(!acState.cooldown){
         acState.reps++;
         acState.cooldown=true;
         clearTimeout(acState.cooldownTimer);
-        acState.cooldownTimer=setTimeout(()=>{acState.cooldown=false;},AC_COOLDOWN_MS);
-        // Update UI
+        acState.cooldownTimer=setTimeout(()=>{acState.cooldown=false;},thr.cooldown);
         const el=$('ac-num'),ring=$('ac-ring');
         if(el){el.textContent=acState.reps;el.style.color='var(--green)';setTimeout(()=>{if(el)el.style.color='var(--text)';},300);}
         if(ring){const off=352-Math.min(acState.reps/20,1)*352;ring.setAttribute('stroke-dashoffset',off);}
@@ -798,6 +892,25 @@ window.renderSettings=function(){
       <p class="label" style="margin-bottom:16px;">Editar perfil</p>
       <label style="display:block;color:var(--subtle);font-size:13px;font-weight:500;margin-bottom:8px;">Nome</label>
       <input id="s_name" class="inp" value="${u.name}" style="margin-bottom:16px;"/>
+
+      <div style="display:flex;gap:10px;margin-bottom:16px;">
+        <div style="flex:1;">
+          <label style="display:block;color:var(--subtle);font-size:13px;font-weight:500;margin-bottom:8px;">Altura (cm)</label>
+          <input id="s_height" class="inp" type="number" value="${u.height||175}" style="text-align:center;"/>
+        </div>
+        <div style="flex:1;">
+          <label style="display:block;color:var(--subtle);font-size:13px;font-weight:500;margin-bottom:8px;">Peso (kg)</label>
+          <input id="s_weight" class="inp" type="number" value="${u.weight||80}" style="text-align:center;"/>
+        </div>
+      </div>
+
+      ${u.height ? `
+      <div style="background:var(--accent-light);border-radius:10px;padding:10px 14px;margin-bottom:16px;display:flex;gap:12px;">
+        <div style="text-align:center;flex:1;"><p style="font-size:18px;font-weight:800;color:var(--accent);">${Math.round(u.height*0.36)}cm</p><p style="color:var(--accent);font-size:10px;opacity:.7;">braco</p></div>
+        <div style="text-align:center;flex:1;"><p style="font-size:18px;font-weight:800;color:var(--accent);">${Math.round(u.height*0.146)}cm</p><p style="color:var(--accent);font-size:10px;opacity:.7;">antebraco</p></div>
+        <div style="text-align:center;flex:1;"><p style="font-size:18px;font-weight:800;color:var(--accent);">${Math.round(u.height*0.53)}cm</p><p style="color:var(--accent);font-size:10px;opacity:.7;">perna</p></div>
+      </div>` : ''}
+
       <label style="display:block;color:var(--subtle);font-size:13px;font-weight:500;margin-bottom:8px;">Dias de treino</label>
       <select id="s_days" class="inp" style="margin-bottom:16px;">
         ${[2,3,4,5].map(n=>`<option value="${n}" ${u.trainDays==n?'selected':''}>${n} dias</option>`).join('')}
@@ -821,6 +934,8 @@ window.renderSettings=function(){
 window.saveSettings=function(){
   const u=S.user();
   u.name=$('s_name').value.trim()||u.name;
+  u.height=parseInt($('s_height').value)||u.height||175;
+  u.weight=parseInt($('s_weight').value)||u.weight||80;
   u.trainDays=$('s_days').value;
   u.sessionTime=$('s_time').value;
   S.set('ga_user',u);renderDashboard();

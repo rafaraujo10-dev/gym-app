@@ -311,6 +311,292 @@ function autoAdjustAfterSession(exercises, sessionData) {
   return changed;
 }
 
+// ─── EXERCISE INFO DATABASE ──────────────────────────────────────────────────
+const EX_INFO = {
+  'Precor Pulldown 304': {
+    muscles: 'Grande dorsal, bíceps, romboides',
+    howto: [
+      'Sente-se com as coxas firmes sob o apoio. Segure a barra com pegada pronada, mãos um pouco mais largas que os ombros.',
+      'Inspire, puxe a barra em direção ao peito superior mantendo o tronco levemente inclinado para trás (~15°).',
+      'Contraia o dorsal no ponto final — cotovelos apontando para baixo e para trás.',
+      'Solte de forma controlada até os braços ficarem quase estendidos. Não deixe o peso cair.',
+    ],
+    tips: 'Evite balançar o tronco. O movimento deve vir do cotovelo, não da mão.',
+    caution: null,
+  },
+  'Genesis Lat': {
+    muscles: 'Grande dorsal, bíceps, core',
+    howto: [
+      'Ajuste o assento para que os joelhos fiquem a 90°. Segure os cabos com pegada neutra.',
+      'Puxe os cotovelos para baixo e para trás, como se fosse colocar os cotovelos nos bolsos.',
+      'Mantenha o peito aberto e os ombros para baixo durante todo o movimento.',
+      'Retorne lentamente controlando a fase excêntrica.',
+    ],
+    tips: 'Foque em "puxar com o cotovelo", não com a mão. Isso ativa mais o dorsal.',
+    caution: null,
+  },
+  'Precor Low Row': {
+    muscles: 'Dorsal médio, romboides, bíceps, trapézio inferior',
+    howto: [
+      'Sente-se com os pés no apoio, joelhos levemente flexionados. Segure os cabos com pegada neutra.',
+      'Puxe os cotovelos para trás mantendo-os próximos ao corpo.',
+      'No ponto final, aperte as escápulas como se fosse segurar um lápis entre elas.',
+      'Retorne controlando — não deixe os ombros "arredondar" na fase de retorno.',
+    ],
+    tips: 'Mantenha a coluna neutra. Não curve as costas para frente para pegar mais peso.',
+    caution: null,
+  },
+  'Precor Seated Row': {
+    muscles: 'Dorsal médio, romboides, bíceps',
+    howto: [
+      'Sente-se ereto com os pés no apoio. Segure os cabos com pegada neutra.',
+      'Puxe em direção ao abdômen mantendo os cotovelos próximos ao corpo.',
+      'Aperte as escápulas no ponto final por 1 segundo.',
+      'Retorne lentamente, permitindo que os ombros se abram levemente.',
+    ],
+    tips: 'Não use o balanço do tronco para ajudar. Movimento limpo vale mais que peso alto.',
+    caution: null,
+  },
+  'Genesis Multiplane Chest': {
+    muscles: 'Peitoral maior, deltóide anterior, tríceps',
+    howto: [
+      'Ajuste o assento para que os cabos fiquem na altura do peito. Sente-se com as costas no encosto.',
+      'Segure os cabos com cotovelos levemente flexionados. Empurre para frente e para dentro.',
+      'Junte as mãos na frente do peito como se fosse abraçar uma árvore grande.',
+      'Retorne controlando — não deixe os cotovelos irem além da linha dos ombros.',
+    ],
+    tips: 'Mantenha uma leve flexão no cotovelo durante todo o movimento para proteger a articulação.',
+    caution: null,
+  },
+  'Dumbbell Bench Press': {
+    muscles: 'Peitoral maior, deltóide anterior, tríceps',
+    howto: [
+      'Deite no banco com os pés no chão. Segure os halteres com pegada pronada na altura do peito.',
+      'Empurre os halteres para cima e levemente para dentro — eles devem se aproximar no topo.',
+      'Desça controlando até os cotovelos ficarem na linha do banco ou levemente abaixo.',
+      'Mantenha as escápulas retraídas e o peito aberto durante todo o movimento.',
+    ],
+    tips: 'Halteres permitem maior amplitude que a barra. Aproveite isso, mas sem exagerar na descida.',
+    caution: null,
+  },
+  'Genesis Chin / Dip Assist': {
+    muscles: 'Grande dorsal, bíceps (chin) / Tríceps, peitoral (dip)',
+    howto: [
+      'Ajuste o peso de assistência — quanto maior o número, mais fácil (o aparelho empurra você para cima).',
+      'Para chin-up: pegada supinada, puxe o queixo acima da barra contraindo o dorsal.',
+      'Para dip: cotovelos próximos ao corpo, desça até 90° e empurre de volta.',
+      'Controle a descida — a fase excêntrica é onde acontece o crescimento muscular.',
+    ],
+    tips: 'Level 6 = assistência moderada. Quanto menor o level, mais difícil. Objetivo é chegar ao level 1.',
+    caution: null,
+  },
+  'Genesis Multiplane Shoulder': {
+    muscles: 'Deltóide medial, deltóide anterior, trapézio',
+    howto: [
+      'Sente-se ereto com os pés no chão. Ajuste o assento para que os cotovelos fiquem na altura dos ombros.',
+      'Empurre os cabos para cima e para fora em arco — movimento de "Y".',
+      'IMPORTANTE: Não desça os cotovelos abaixo de 90° para proteger o ombro direito.',
+      'Retorne controlando até a posição inicial sem deixar os ombros subirem em direção às orelhas.',
+    ],
+    tips: 'Ombro é uma articulação delicada. Prefira amplitude segura com peso menor a amplitude total com peso alto.',
+    caution: 'Ombro direito: não descer abaixo de 90°. Histórico de clique articular.',
+  },
+  'Genesis Biceps': {
+    muscles: 'Bíceps braquial, braquial, braquiorradial',
+    howto: [
+      'Sente-se com as costas no encosto. Segure os cabos com pegada supinada (palmas para cima).',
+      'Flexione os cotovelos puxando os cabos em direção aos ombros.',
+      'Mantenha os cotovelos fixos — eles não devem se mover para frente ou para trás.',
+      'Desça lentamente até quase a extensão completa — não trave o cotovelo.',
+    ],
+    tips: 'A fase de descida (excêntrica) é tão importante quanto a subida. Conte 2 segundos descendo.',
+    caution: null,
+  },
+  'Genesis Biceps Preacher': {
+    muscles: 'Bíceps braquial (cabeça longa), braquial',
+    howto: [
+      'Apoie os braços no suporte inclinado com as axilas no topo do apoio.',
+      'Segure os cabos com pegada supinada. Flexione os cotovelos puxando em direção ao rosto.',
+      'O apoio inclinado isola o bíceps — você não consegue usar o ombro para ajudar.',
+      'Desça controlando até quase a extensão — não trave o cotovelo no final.',
+    ],
+    tips: 'Por isolar mais o bíceps, o peso aqui é menor que no curl normal. Isso é normal.',
+    caution: null,
+  },
+  'Genesis Triceps': {
+    muscles: 'Tríceps braquial (todas as 3 cabeças)',
+    howto: [
+      'Sente-se com as costas no encosto. Segure os cabos com pegada pronada (palmas para baixo).',
+      'Estenda os cotovelos empurrando os cabos para baixo e para frente.',
+      'Mantenha os cotovelos fixos ao lado do corpo — não deixe eles se abrirem.',
+      'Retorne controlando até os antebraços ficarem paralelos ao chão.',
+    ],
+    tips: 'Tríceps representa 2/3 do volume do braço. Treinar bem aqui tem grande impacto visual.',
+    caution: null,
+  },
+  'Genesis Triceps Seated': {
+    muscles: 'Tríceps braquial (cabeça longa principalmente)',
+    howto: [
+      'Sente-se com as costas no encosto. Segure os cabos acima da cabeça.',
+      'Estenda os cotovelos empurrando para cima — cotovelos apontando para o teto.',
+      'Mantenha os cotovelos próximos à cabeça durante todo o movimento.',
+      'Retorne controlando — a cabeça longa do tríceps é mais ativada com o braço elevado.',
+    ],
+    tips: 'Posição sentada com braços elevados isola melhor a cabeça longa. Movimento mais curto que o normal.',
+    caution: null,
+  },
+  'Leg Extension': {
+    muscles: 'Quadríceps (reto femoral, vasto lateral, vasto medial, vasto intermédio)',
+    howto: [
+      'Ajuste o encosto para que os joelhos fiquem alinhados com o eixo da máquina.',
+      'Posicione o apoio na parte inferior da canela, não no tornozelo.',
+      'Estenda os joelhos até quase a extensão completa — não trave.',
+      'Desça controlando — não deixe o peso cair.',
+    ],
+    tips: 'Por causa do histórico de ACL: prefira amplitude parcial (não estenda 100%) e peso moderado com mais reps.',
+    caution: 'ACL: evite extensão total. Pare a 10° do final se sentir desconforto.',
+  },
+  'Leg Curl': {
+    muscles: 'Isquiotibiais, gastrocnêmio',
+    howto: [
+      'Deite de bruços com os joelhos alinhados ao eixo da máquina.',
+      'Posicione o apoio na parte posterior do tornozelo.',
+      'Flexione os joelhos puxando os calcanhares em direção aos glúteos.',
+      'Desça controlando — não deixe o peso cair.',
+    ],
+    tips: 'Isquiotibiais fortes protegem o joelho e o ACL. Priorize esse exercício.',
+    caution: 'ACL: movimento controlado. Pare se sentir qualquer desconforto no joelho.',
+  },
+  'Prone Leg Curl': {
+    muscles: 'Isquiotibiais, gastrocnêmio',
+    howto: [
+      'Deite de bruços com os joelhos alinhados ao eixo. Posicione o apoio no tornozelo.',
+      'Flexione os joelhos puxando os calcanhares em direção aos glúteos.',
+      'Mantenha os quadris pressionados contra o banco durante todo o movimento.',
+      'Retorne lentamente — fase excêntrica é crucial para os isquiotibiais.',
+    ],
+    tips: 'Variação deitada permite maior amplitude que a sentada. Foque na contração no topo.',
+    caution: 'ACL: controle total do movimento. Sem impulso.',
+  },
+  'Genesis Total Quad / Hip': {
+    muscles: 'Quadríceps, flexores do quadril',
+    howto: [
+      'Ajuste o aparelho para sua amplitude de movimento confortável.',
+      'Movimento de extensão do quadril e joelho simultaneamente.',
+      'Mantenha o core ativado durante todo o movimento.',
+      'Retorne controlando — não deixe o peso guiar o movimento.',
+    ],
+    tips: 'Aparelho multiplanar — permite movimento mais natural que máquinas tradicionais.',
+    caution: 'ACL: amplitude conservadora. Não force além do confortável.',
+  },
+  'Genesis Total Glute / Ham': {
+    muscles: 'Glúteo máximo, isquiotibiais',
+    howto: [
+      'Posicione-se conforme indicado no aparelho. Ajuste para sua amplitude.',
+      'Movimento de extensão do quadril ativando glúteo e posterior da coxa.',
+      'Contraia o glúteo no ponto final por 1 segundo.',
+      'Retorne controlando — não use impulso.',
+    ],
+    tips: 'Glúteos fortes protegem o joelho e a coluna. Exercício fundamental para saúde articular.',
+    caution: null,
+  },
+  'Inner Thigh': {
+    muscles: 'Adutores (grácil, pectíneo, adutor longo/curto/magno)',
+    howto: [
+      'Sente-se com as costas no encosto. Ajuste os apoios para sua amplitude.',
+      'Junte as pernas pressionando os apoios para dentro.',
+      'Contraia os adutores no ponto final.',
+      'Retorne controlando — não deixe as pernas se abrirem bruscamente.',
+    ],
+    tips: 'Adutores fortes melhoram estabilidade do joelho. Importante para quem tem histórico de ACL.',
+    caution: null,
+  },
+  'Outer Thigh': {
+    muscles: 'Abdutores (glúteo médio, tensor da fáscia lata)',
+    howto: [
+      'Sente-se com as costas no encosto. Ajuste os apoios para sua amplitude.',
+      'Abra as pernas pressionando os apoios para fora.',
+      'Contraia os abdutores no ponto final.',
+      'Retorne controlando.',
+    ],
+    tips: 'Glúteo médio forte é essencial para estabilidade do joelho e prevenção de lesões.',
+    caution: null,
+  },
+  'Genesis Multiplane Calf': {
+    muscles: 'Gastrocnêmio, sóleo',
+    howto: [
+      'Posicione os pés na plataforma com os calcanhares para fora.',
+      'Eleve-se na ponta dos pés contraindo a panturrilha no topo.',
+      'Desça além do nível da plataforma para alongar o músculo.',
+      'Movimento lento e controlado — panturrilha responde bem ao tempo sob tensão.',
+    ],
+    tips: 'Panturrilha é um músculo resistente — use mais reps (15-25) para melhores resultados.',
+    caution: null,
+  },
+  'Genesis Dual Cable': {
+    muscles: 'Depende do ângulo: dorsal, peitoral, deltóide',
+    howto: [
+      'Ajuste as polias para a altura desejada. Posicione-se no centro.',
+      'Segure os cabos e execute o movimento no plano desejado.',
+      'Mantenha o core ativado para estabilidade.',
+      'Controle a fase excêntrica em ambos os lados.',
+    ],
+    tips: 'Cabo duplo permite movimentos funcionais em múltiplos planos. Ótimo para finalizar o treino.',
+    caution: null,
+  },
+  'Decline Sit-up': {
+    muscles: 'Reto abdominal, oblíquos, flexores do quadril',
+    howto: [
+      'Deite no banco inclinado com os pés presos. Braços cruzados no peito ou atrás da cabeça.',
+      'Suba contraindo o abdômen — não puxe o pescoço com as mãos.',
+      'Suba até os cotovelos tocarem os joelhos ou próximo disso.',
+      'Desça controlando — não deixe as costas baterem no banco.',
+    ],
+    tips: 'A inclinação aumenta a amplitude e a dificuldade. Mais eficiente que o sit-up no chão.',
+    caution: null,
+  },
+};
+
+// Show exercise info sheet
+window.showExInfo = function(exName) {
+  const info = EX_INFO[exName];
+  if(!info) return;
+  const ov = document.createElement('div');
+  ov.className = 'overlay fade-in'; ov.id = 'exinfo-ov';
+  ov.innerHTML = `<div class="sheet" style="max-height:88vh;overflow-y:auto;">
+    <div class="sheet-handle"></div>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;">
+      <div>
+        <p style="font-size:18px;font-weight:800;line-height:1.2;">${exName}</p>
+        <p style="color:var(--muted);font-size:12px;margin-top:4px;">💪 ${info.muscles}</p>
+      </div>
+    </div>
+
+    ${info.caution ? `
+    <div style="background:var(--orange-light);border-radius:10px;padding:10px 14px;margin-bottom:16px;">
+      <p style="color:var(--orange);font-size:13px;font-weight:600;">⚠ ${info.caution}</p>
+    </div>` : ''}
+
+    <div style="margin-bottom:16px;">
+      <p style="font-size:13px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Como executar</p>
+      ${info.howto.map((step, i) => `
+        <div style="display:flex;gap:10px;margin-bottom:10px;">
+          <div style="width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:1px;">${i+1}</div>
+          <p style="font-size:14px;line-height:1.6;color:var(--text);">${step}</p>
+        </div>`).join('')}
+    </div>
+
+    <div style="background:var(--accent-light);border-radius:12px;padding:12px 14px;margin-bottom:20px;">
+      <p style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:4px;">💡 Dica do personal</p>
+      <p style="font-size:13px;color:var(--accent);line-height:1.6;">${info.tips}</p>
+    </div>
+
+    <button class="btn btn-dark" onclick="$('exinfo-ov').remove()">Entendido</button>
+  </div>`;
+  ov.onclick = e => { if(e.target===ov) ov.remove(); };
+  document.body.appendChild(ov);
+};
+
 // ─── BOTTOM NAV ───────────────────────────────────────────────────────────────
 function bnav(active) {
   return `<div class="bnav">
@@ -328,13 +614,13 @@ let OB = {}; // onboarding state
 
 function renderOnboarding(step) {
   OB.step = step || 1;
-  const steps = {1:obStep1, 2:obStep2, 3:obStep3, 4:obStep4, 5:obStep5};
+  const steps = {1:obStep1, 2:obStep2, 3:obStep3, 4:obStep4gym, 5:obStep5weights, 6:obStep6confirm};
   app.innerHTML = (steps[OB.step] || obStep1)();
 }
 
 function obProgress(step) {
   return `<div style="display:flex;gap:6px;margin-bottom:32px;">
-    ${[1,2,3,4,5].map(i=>`
+    ${[1,2,3,4,5,6].map(i=>`
       <div style="flex:1;height:3px;border-radius:4px;background:${i<=step?'var(--accent)':'var(--card2)'};transition:background .3s;"></div>`).join('')}
   </div>`;
 }
@@ -344,7 +630,7 @@ function obStep1() {
   return `<div class="ob-step fade-in pt-safe">
     ${obProgress(1)}
     <div style="margin-bottom:32px;">
-      <p style="font-size:13px;color:var(--muted);font-weight:500;margin-bottom:8px;">PASSO 1 DE 5</p>
+      <p style="font-size:13px;color:var(--muted);font-weight:500;margin-bottom:8px;">PASSO 1 DE 6</p>
       <h1 style="font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-bottom:10px;">Vamos te<br>conhecer. 👋</h1>
       <p style="color:var(--subtle);font-size:15px;line-height:1.6;">Essas informacoes ajudam a estimar seus pesos iniciais com precisao.</p>
     </div>
@@ -396,7 +682,7 @@ function obStep2() {
   return `<div class="ob-step fade-in pt-safe">
     ${obProgress(2)}
     <div style="margin-bottom:28px;">
-      <p style="font-size:13px;color:var(--muted);font-weight:500;margin-bottom:8px;">PASSO 2 DE 5</p>
+      <p style="font-size:13px;color:var(--muted);font-weight:500;margin-bottom:8px;">PASSO 2 DE 6</p>
       <h1 style="font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-bottom:10px;">Seu nivel e<br>objetivo. 🎯</h1>
       <p style="color:var(--subtle);font-size:15px;line-height:1.6;">Isso define os pesos iniciais e a estrutura dos seus treinos.</p>
     </div>
@@ -461,7 +747,7 @@ function obStep3() {
   return `<div class="ob-step fade-in pt-safe">
     ${obProgress(3)}
     <div style="margin-bottom:28px;">
-      <p style="font-size:13px;color:var(--muted);font-weight:500;margin-bottom:8px;">PASSO 3 DE 5</p>
+      <p style="font-size:13px;color:var(--muted);font-weight:500;margin-bottom:8px;">PASSO 3 DE 6</p>
       <h1 style="font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-bottom:10px;">Sua agenda<br>de treinos. 📅</h1>
       <p style="color:var(--subtle);font-size:15px;line-height:1.6;">Selecione os dias que voce vai treinar. Cada dia recebe um treino diferente (A, B, C...).</p>
     </div>
@@ -514,20 +800,106 @@ window.obNext3 = function() {
   renderOnboarding(4);
 };
 
-// ── Step 4: Weight estimation preview ────────────────────────────────────
-function obStep4() {
+// ── Step 4: Gym Equipment ─────────────────────────────────────────────────
+function obStep4gym() {
+  return `<div class="ob-step fade-in pt-safe">
+    ${obProgress(4)}
+    <div style="margin-bottom:28px;">
+      <p style="font-size:13px;color:var(--muted);font-weight:500;margin-bottom:8px;">PASSO 4 DE 6</p>
+      <h1 style="font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-bottom:10px;">Sua academia<br>e equipamentos. 🏋️</h1>
+      <p style="color:var(--subtle);font-size:15px;line-height:1.6;">Para montar seus treinos, precisamos saber quais maquinas voce tem disponivel.</p>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:28px;">
+
+      <!-- Option 1: Photo/Video — coming soon -->
+      <div style="padding:16px;border-radius:14px;border:1.5px solid var(--border);background:var(--card);opacity:.55;position:relative;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span style="font-size:28px;">📸</span>
+          <div>
+            <p style="font-size:15px;font-weight:700;">Foto ou video da academia</p>
+            <p style="color:var(--muted);font-size:12px;margin-top:2px;">A IA reconhece as maquinas automaticamente</p>
+          </div>
+        </div>
+        <div style="position:absolute;top:10px;right:12px;background:var(--card2);border-radius:20px;padding:3px 8px;"><span style="font-size:10px;font-weight:600;color:var(--muted);">EM BREVE</span></div>
+      </div>
+
+      <!-- Option 2: Manual list -->
+      <button onclick="OB.gymMode='manual';document.querySelectorAll('.gym-opt').forEach(b=>b.classList.remove('on'));this.classList.add('on');"
+        class="sel-pill gym-opt ${OB.gymMode==='manual'?'on':''}" style="text-align:left;padding:16px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span style="font-size:28px;">✏️</span>
+          <div>
+            <p style="font-size:15px;font-weight:700;color:var(--text);">Selecionar manualmente</p>
+            <p style="color:var(--muted);font-size:12px;margin-top:2px;">Escolha os equipamentos da sua lista</p>
+          </div>
+        </div>
+      </button>
+
+      <!-- Option 3: Use default -->
+      <button onclick="OB.gymMode='default';document.querySelectorAll('.gym-opt').forEach(b=>b.classList.remove('on'));this.classList.add('on');"
+        class="sel-pill gym-opt ${OB.gymMode==='default'||!OB.gymMode?'on':''}" style="text-align:left;padding:16px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span style="font-size:28px;">⚡</span>
+          <div>
+            <p style="font-size:15px;font-weight:700;color:var(--text);">Usar lista padrao</p>
+            <p style="color:var(--muted);font-size:12px;margin-top:2px;">Equipamentos Genesis + Precor — academia completa</p>
+          </div>
+        </div>
+      </button>
+    </div>
+
+    <!-- Manual equipment picker (shown when manual selected) -->
+    <div id="manual-picker" style="display:${OB.gymMode==='manual'?'block':'none'};margin-bottom:20px;">
+      <p style="font-size:13px;font-weight:600;color:var(--subtle);margin-bottom:10px;">Selecione os equipamentos disponíveis:</p>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        ${Object.keys(EX_LIBRARY).map(name=>`
+          <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--card);border-radius:10px;border:1.5px solid var(--border);cursor:pointer;">
+            <input type="checkbox" value="${name}" ${(OB.selectedEquip||Object.keys(EX_LIBRARY)).includes(name)?'checked':''} onchange="toggleEquip('${name}')"
+              style="width:18px;height:18px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;"/>
+            <span style="font-size:13px;font-weight:500;">${name}</span>
+            <span style="margin-left:auto;font-size:14px;">${TYPE_EMOJI[EX_LIBRARY[name].type]||'💪'}</span>
+          </label>`).join('')}
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-ghost" style="flex:.4;" onclick="renderOnboarding(3)">← Voltar</button>
+      <button class="btn btn-dark" style="flex:1;" onclick="obNext4gym()">Continuar →</button>
+    </div>
+  </div>`;
+}
+
+// Show/hide manual picker when option changes
+document.addEventListener('click', e => {
+  const picker = document.getElementById('manual-picker');
+  if(picker) picker.style.display = OB.gymMode==='manual' ? 'block' : 'none';
+});
+
+window.toggleEquip = function(name) {
+  if(!OB.selectedEquip) OB.selectedEquip = Object.keys(EX_LIBRARY);
+  const idx = OB.selectedEquip.indexOf(name);
+  if(idx>=0) OB.selectedEquip.splice(idx,1);
+  else OB.selectedEquip.push(name);
+};
+
+window.obNext4gym = function() {
+  if(!OB.gymMode) OB.gymMode = 'default';
+  renderOnboarding(5);
+};
+
+// ── Step 5: Weight estimation preview ────────────────────────────────────
+function obStep5weights() {
   const numDays = OB.selectedDays.length;
   const workouts = buildWorkouts(OB.focus||'full', numDays, OB.level||'int', OB.weight||80);
   OB._previewWorkouts = workouts;
-
-  // Show first workout as preview
   const firstKey = WORKOUT_KEYS[0];
   const exList = workouts[firstKey] || [];
 
   return `<div class="ob-step fade-in pt-safe">
-    ${obProgress(4)}
+    ${obProgress(5)}
     <div style="margin-bottom:24px;">
-      <p style="font-size:13px;color:var(--muted);font-weight:500;margin-bottom:8px;">PASSO 4 DE 5</p>
+      <p style="font-size:13px;color:var(--muted);font-weight:500;margin-bottom:8px;">PASSO 5 DE 6</p>
       <h1 style="font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-bottom:10px;">Seus pesos<br>estimados. 🧮</h1>
       <p style="color:var(--subtle);font-size:15px;line-height:1.6;">Calculamos pesos iniciais baseados no seu perfil. <strong>Sao estimativas</strong> — voce vai confirmar e ajustar na academia.</p>
     </div>
@@ -547,27 +919,23 @@ function obStep4() {
 
     <div class="card-flat" style="margin-bottom:24px;background:var(--orange-light);border-color:var(--orange-light);">
       <p style="font-size:13px;font-weight:600;color:var(--orange);margin-bottom:4px;">⚠ Importante — primeira sessao</p>
-      <p style="font-size:13px;color:var(--orange);line-height:1.6;">Na sua primeira vez em cada maquina, teste o peso sugerido. Se fizer mais de 18 reps com facilidade, o app sobe automaticamente. Se nao conseguir 8, o app desce. Voce sempre pode ajustar manualmente.</p>
+      <p style="font-size:13px;color:var(--orange);line-height:1.6;">Na sua primeira vez em cada maquina, teste o peso sugerido. Se fizer mais de 18 reps com facilidade, o app sobe automaticamente. Se nao conseguir 8, o app desce.</p>
     </div>
 
     <div style="display:flex;gap:10px;">
-      <button class="btn btn-ghost" style="flex:.4;" onclick="renderOnboarding(3)">← Voltar</button>
-      <button class="btn btn-dark" style="flex:1;" onclick="obNext4()">Parece bom →</button>
+      <button class="btn btn-ghost" style="flex:.4;" onclick="renderOnboarding(4)">← Voltar</button>
+      <button class="btn btn-dark" style="flex:1;" onclick="renderOnboarding(6)">Parece bom →</button>
     </div>
   </div>`;
 }
-window.obNext4 = function() { renderOnboarding(5); };
 
-// ── Step 5: Confirm + Launch ──────────────────────────────────────────────
-function obStep5() {
+// ── Step 6: Confirm + Launch ──────────────────────────────────────────────
+function obStep6confirm() {
   const numDays = OB.selectedDays.length;
-  const schedule = {};
-  OB.selectedDays.forEach((d,i)=>{ schedule[d]=WORKOUT_KEYS[i]; });
-
   return `<div class="ob-step fade-in pt-safe">
-    ${obProgress(5)}
+    ${obProgress(6)}
     <div style="margin-bottom:28px;">
-      <p style="font-size:13px;color:var(--muted);font-weight:500;margin-bottom:8px;">PASSO 5 DE 5</p>
+      <p style="font-size:13px;color:var(--muted);font-weight:500;margin-bottom:8px;">PASSO 6 DE 6</p>
       <h1 style="font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-bottom:10px;">Tudo pronto,<br>${OB.name}! 🚀</h1>
       <p style="color:var(--subtle);font-size:15px;line-height:1.6;">Confirme seu plano antes de comecar.</p>
     </div>
@@ -577,6 +945,7 @@ function obStep5() {
         ['👤','Perfil',`${OB.name} · ${OB.height}cm · ${OB.weight}kg`],
         ['🎯','Nivel',`${OB.level==='beg'?'Iniciante':OB.level==='adv'?'Avancado':'Intermediario'} · ${OB.focus==='full'?'Full Body':OB.focus==='upper'?'Upper Body':'Lower Body'}`],
         ['📅','Agenda',`${numDays} dias/semana: ${OB.selectedDays.map(d=>DAY_NAMES[d]).join(', ')}`],
+        ['🏋️','Academia',`${OB.gymMode==='manual'?'Equipamentos selecionados manualmente':'Lista padrao Genesis + Precor'}`],
         ['💪','Treinos',`${numDays} treinos diferentes (${WORKOUT_KEYS.slice(0,numDays).join(', ')})`],
       ].map(([ic,label,val])=>`
         <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);">
@@ -593,7 +962,7 @@ function obStep5() {
     </div>
 
     <div style="display:flex;gap:10px;">
-      <button class="btn btn-ghost" style="flex:.4;" onclick="renderOnboarding(4)">← Voltar</button>
+      <button class="btn btn-ghost" style="flex:.4;" onclick="renderOnboarding(5)">← Voltar</button>
       <button class="btn btn-green" style="flex:1;" onclick="obFinish()">Comecar a treinar! 💪</button>
     </div>
   </div>`;
@@ -795,7 +1164,9 @@ function weightsTab(u, schedMap) {
               ${ex.caution?`<p style="color:var(--orange);font-size:11px;margin-top:1px;">⚠ ${ex.caution}</p>`:''}
               ${sug==='up'?`<span class="chip chip-green" style="margin-top:3px;font-size:11px;">Considere subir ↑</span>`:''}
             </div>
-            <button onclick="editWeight('${key}',${i})"
+            <div style="display:flex;align-items:center;gap:6px;">
+              ${EX_INFO[ex.name]?`<button onclick="showExInfo('${ex.name.replace(/'/g,"\\'")}') " style="width:28px;height:28px;border-radius:50%;background:var(--accent-light);border:none;color:var(--accent);font-size:14px;font-weight:700;cursor:pointer;">ⓘ</button>`:''}
+              <button onclick="editWeight('${key}',${i})"
               style="padding:8px 14px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;">
               ${ex.weight>0?ex.weight+' '+ex.unit:'corpo'}
             </button>
@@ -871,7 +1242,10 @@ window.startWorkout=function(key){
             ${ex.caution?`<span class="chip chip-orange">⚠ ${ex.caution}</span>`:''}
           </div>
           <p style="font-size:28px;font-weight:800;letter-spacing:-.02em;line-height:1.15;margin-bottom:6px;">${ex.name}</p>
-          <p style="color:var(--subtle);font-size:16px;font-weight:500;">${wLabel(ex)}</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <p style="color:var(--subtle);font-size:16px;font-weight:500;">${wLabel(ex)}</p>
+            ${EX_INFO[ex.name]?`<button onclick="showExInfo('${ex.name.replace(/'/g,"\\'")}') " style="width:28px;height:28px;border-radius:50%;background:var(--accent-light);border:none;color:var(--accent);font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0;">ⓘ</button>`:''}
+          </div>
         </div>
 
         <div class="card" style="margin-bottom:20px;">
@@ -916,15 +1290,18 @@ window.startWorkout=function(key){
       ${exercises.map((ex,i)=>{
         const done=(sessionData[i]?.reps?.length||0)===3;
         const current=i===cur, started=(sessionData[i]?.reps?.length||0)>0;
-        return `<div style="display:flex;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);gap:12px;cursor:pointer;" onclick="jumpTo(${i})">
-          <div style="width:36px;height:36px;border-radius:10px;background:${done?'var(--green-light)':current?'var(--accent)':started?'var(--accent-light)':'var(--bg)'};color:${done?'var(--green)':current?'#fff':'var(--accent)'};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;">
+        return `<div style="display:flex;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);gap:12px;">
+          <div style="width:36px;height:36px;border-radius:10px;background:${done?'var(--green-light)':current?'var(--accent)':started?'var(--accent-light)':'var(--bg)'};color:${done?'var(--green)':current?'#fff':'var(--accent)'};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;cursor:pointer;" onclick="jumpTo(${i})">
             ${done?'✓':current?'▶':i+1}
           </div>
-          <div style="flex:1;min-width:0;">
+          <div style="flex:1;min-width:0;cursor:pointer;" onclick="jumpTo(${i})">
             <p style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;${current?'color:var(--accent)':''}">${ex.name}</p>
             <p style="color:var(--muted);font-size:12px;margin-top:1px;">${wLabel(ex)}</p>
           </div>
-          ${done&&sessionData[i]?`<span class="chip chip-green" style="font-size:11px;">${sessionData[i].reps.join('/')}</span>`:''}
+          <div style="display:flex;align-items:center;gap:6px;">
+            ${done&&sessionData[i]?`<span class="chip chip-green" style="font-size:11px;">${sessionData[i].reps.join('/')}</span>`:''}
+            ${EX_INFO[ex.name]?`<button onclick="showExInfo('${ex.name.replace(/'/g,"\\'")}') " style="width:26px;height:26px;border-radius:50%;background:var(--accent-light);border:none;color:var(--accent);font-size:13px;font-weight:700;cursor:pointer;">ⓘ</button>`:''}
+          </div>
         </div>`;
       }).join('')}
       <button class="btn btn-ghost" style="margin-top:12px;" onclick="$('exlist-ov').remove()">Fechar</button>

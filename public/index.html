@@ -145,12 +145,54 @@ const DEFAULT_WORKOUTS = {
     {name:'Genesis Multiplane Calf', weight:180, unit:'lb',  type:'legs'},
     {name:'Genesis Dual Cable',   weight:17,  unit:'lb',     type:'upper'},
     {name:'Decline Sit-up',       weight:0,   unit:'corpo',  type:'core'},
+  ],
+  D:[
+    {name:'Genesis Multiplane Chest',  weight:30,  unit:'lb',    type:'upper'},
+    {name:'Genesis Chin / Dip Assist', weight:6,   unit:'level', type:'upper'},
+    {name:'Precor Seated Row',    weight:60,  unit:'lb',     type:'upper'},
+    {name:'Leg Extension',        weight:80,  unit:'lb',     type:'legs'},
+    {name:'Prone Leg Curl',       weight:60,  unit:'lb',     type:'legs'},
+    {name:'Genesis Multiplane Shoulder', weight:25, unit:'lb', type:'upper', caution:'Max 90°'},
+    {name:'Genesis Biceps Preacher', weight:20, unit:'lb',   type:'upper'},
+    {name:'Genesis Triceps Seated',  weight:30, unit:'lb',   type:'upper'},
+    {name:'Genesis Multiplane Calf', weight:180, unit:'lb',  type:'legs'},
+    {name:'Inner Thigh',          weight:130, unit:'lb',     type:'legs'},
+    {name:'Decline Sit-up',       weight:0,   unit:'corpo',  type:'core'},
+  ],
+  E:[
+    {name:'Precor Pulldown 304',  weight:70,  unit:'lb',     type:'upper'},
+    {name:'Genesis Multiplane Chest', weight:30, unit:'lb',  type:'upper'},
+    {name:'Precor Low Row',       weight:80,  unit:'lb',     type:'upper'},
+    {name:'Genesis Total Quad / Hip',  weight:17.5, unit:'lb', type:'legs'},
+    {name:'Genesis Total Glute / Ham', weight:20,   unit:'lb', type:'legs'},
+    {name:'Genesis Multiplane Shoulder', weight:25, unit:'lb', type:'upper', caution:'Max 90°'},
+    {name:'Genesis Biceps',       weight:20,  unit:'lb',     type:'upper'},
+    {name:'Genesis Triceps',      weight:35,  unit:'lb',     type:'upper'},
+    {name:'Genesis Dual Cable',   weight:17,  unit:'lb',     type:'upper'},
+    {name:'Outer Thigh',          weight:130, unit:'lb',     type:'legs'},
+    {name:'Decline Sit-up',       weight:0,   unit:'corpo',  type:'core'},
   ]
 };
 const DAY_NAMES=['Domingo','Segunda','Terca','Quarta','Quinta','Sexta','Sabado'];
 const DAY_SHORT=['D','S','T','Q','Q','S','S'];
-const TRAIN_DAYS={1:'A',3:'B',5:'C'};
 const TYPE_EMOJI={upper:'💪',legs:'🦵',core:'🔥'};
+
+// Returns {dayIndex: 'WorkoutKey'} based on how many days/week the user trains.
+// Always starts Monday, spreads evenly across the week, skips Sunday.
+function buildTrainDays(numDays) {
+  // Schedules per number of days (0=Sun,1=Mon,...,6=Sat)
+  const schedules = {
+    2: [1, 4],           // Mon, Thu
+    3: [1, 3, 5],        // Mon, Wed, Fri
+    4: [1, 2, 4, 5],     // Mon, Tue, Thu, Fri
+    5: [1, 2, 3, 4, 5],  // Mon–Fri
+  };
+  const keys = ['A','B','C','D','E'];
+  const days = schedules[numDays] || schedules[3];
+  const map = {};
+  days.forEach((d, i) => { map[d] = keys[i]; });
+  return map;
+}
 
 // ─── STORAGE ─────────────────────────────────────────────────────────────────
 const S={
@@ -280,14 +322,15 @@ window.saveOnboarding=function(){
 function renderDashboard(tab){
   const u=S.user(),streak=S.streak(),logs=S.logs();
   const today=new Date().getDay();
-  const scheduled=TRAIN_DAYS[today];
+  const trainDays=buildTrainDays(parseInt(u.trainDays)||3);
+  const scheduled=trainDays[today];
   const weekStart=new Date();weekStart.setDate(weekStart.getDate()-weekStart.getDay());weekStart.setHours(0,0,0,0);
   const weekCount=logs.filter(l=>new Date(l.date)>=weekStart).length;
   const lastLog=logs.length?logs[logs.length-1]:null;
   const t=tab||'home';
 
   let content='';
-  if(t==='home')    content=homeTab(u,scheduled,streak,weekCount,lastLog,today);
+  if(t==='home')    content=homeTab(u,scheduled,streak,weekCount,lastLog,today,trainDays);
   if(t==='history') content=historyTab(logs);
   if(t==='weights') content=weightsTab();
 
@@ -313,7 +356,7 @@ function renderDashboard(tab){
 }
 
 // ─── HOME TAB ─────────────────────────────────────────────────────────────────
-function homeTab(u,scheduled,streak,weekCount,lastLog,today){
+function homeTab(u,scheduled,streak,weekCount,lastLog,today,trainDays){
   return `
     ${scheduled?`
     <div class="workout-hero" style="margin-bottom:14px;box-shadow:0 8px 28px rgba(91,79,255,.25);">
@@ -347,10 +390,14 @@ function homeTab(u,scheduled,streak,weekCount,lastLog,today){
       <p class="label" style="margin-bottom:10px;">Semana</p>
       <div style="display:flex;gap:6px;">
         ${DAY_SHORT.map((d,i)=>{
-          const isToday=i===today,isTrain=[1,3,5].includes(i);
-          return `<div style="flex:1;aspect-ratio:1;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;
+          const isToday=i===today, isTrain=trainDays[i]!==undefined;
+          const letter=trainDays[i]||'';
+          return `<div style="flex:1;aspect-ratio:1;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
             background:${isToday?'var(--accent)':isTrain?'var(--accent-light)':'var(--card2)'};
-            color:${isToday?'#fff':isTrain?'var(--accent)':'var(--muted)'};">${d}</div>`;
+            color:${isToday?'#fff':isTrain?'var(--accent)':'var(--muted)'};">
+            <span style="font-size:11px;font-weight:700;">${d}</span>
+            ${letter?`<span style="font-size:9px;opacity:.7;">${letter}</span>`:''}
+          </div>`;
         }).join('')}
       </div>
     </div>
@@ -370,6 +417,9 @@ function homeTab(u,scheduled,streak,weekCount,lastLog,today){
 
 // ─── PICK WORKOUT ─────────────────────────────────────────────────────────────
 window.pickWorkout=function(){
+  const u=S.user();
+  const trainDays=buildTrainDays(parseInt(u.trainDays)||3);
+  const keys=[...new Set(Object.values(trainDays))]; // e.g. ['A','B','C','D']
   const ov=document.createElement('div');
   ov.className='overlay fade-in';ov.id='pick-ov';
   ov.innerHTML=`
@@ -377,12 +427,12 @@ window.pickWorkout=function(){
     <div class="sheet-handle"></div>
     <p style="font-size:20px;font-weight:800;margin-bottom:4px;">Qual treino hoje?</p>
     <p style="color:var(--subtle);font-size:13px;margin-bottom:20px;">Escolha o treino que vai fazer agora</p>
-    <div style="display:flex;gap:10px;margin-bottom:16px;">
-      ${['A','B','C'].map(k=>`
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+      ${keys.map(k=>`
         <button onclick="closePick();startWorkout('${k}')"
-          style="flex:1;padding:20px 8px;background:var(--accent-light);border:2px solid var(--accent-light);border-radius:16px;cursor:pointer;text-align:center;">
+          style="flex:1;min-width:60px;padding:20px 8px;background:var(--accent-light);border:2px solid var(--accent-light);border-radius:16px;cursor:pointer;text-align:center;">
           <p style="font-size:26px;font-weight:800;color:var(--accent);">${k}</p>
-          <p style="color:var(--accent);font-size:11px;opacity:.7;margin-top:4px;">${S.workouts()[k].length} ex.</p>
+          <p style="color:var(--accent);font-size:11px;opacity:.7;margin-top:4px;">${S.workouts()[k]?.length||0} ex.</p>
         </button>`).join('')}
     </div>
     <button class="btn btn-ghost" onclick="closePick()">Cancelar</button>
@@ -447,8 +497,11 @@ window.showLog=function(dateStr){
 // ─── WEIGHTS TAB ──────────────────────────────────────────────────────────────
 function weightsTab(){
   const wk=S.workouts();
+  const u=S.user();
+  const trainDays=buildTrainDays(parseInt(u.trainDays)||3);
+  const keys=[...new Set(Object.values(trainDays))];
   return `<div style="display:flex;flex-direction:column;gap:12px;">
-    ${['A','B','C'].map(key=>`
+    ${keys.map(key=>`
       <div class="card" style="box-shadow:0 1px 8px rgba(0,0,0,.05);">
         <div style="padding:16px 16px 4px;border-bottom:1px solid var(--border);">
           <p style="font-size:16px;font-weight:800;">Treino ${key}</p>

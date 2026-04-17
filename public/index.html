@@ -1196,18 +1196,19 @@ function weightsTab(u, schedMap) {
           const sug=getSuggestion(ex.name,ex.type,ex.weight);
           return `
           <div style="display:flex;align-items:center;padding:11px 16px;border-bottom:1px solid var(--border);gap:10px;">
-            <span style="font-size:18px;flex-shrink:0;">${TYPE_LABEL[ex.type]||''}</span>
+            <span style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.06em;width:32px;flex-shrink:0;">${TYPE_LABEL[ex.type]||''}</span>
             <div style="flex:1;min-width:0;">
               <p style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${ex.name}</p>
               ${ex.caution?`<p style="color:var(--amber);font-size:11px;margin-top:1px;">! ${ex.caution}</p>`:''}
-              ${sug==='up'?`<span class="badge badge-lime" style="margin-top:3px;font-size:11px;">Considere subir ↑</span>`:''}
+              ${sug==='up'?`<span class="badge badge-lime" style="margin-top:3px;font-size:11px;">Subir ↑</span>`:''}
             </div>
-            <div style="display:flex;align-items:center;gap:6px;">
-              ${EX_INFO[ex.name]?`<button onclick="showExInfo('${ex.name.replace(/'/g,"\\'")}') " style="width:28px;height:28px;border-radius:50%;background:var(--lime-dim);border:none;color:var(--lime);font-size:14px;font-weight:700;cursor:pointer;">ⓘ</button>`:''}
+            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+              ${EX_INFO[ex.name]?`<button onclick="showExInfo('${ex.name.replace(/'/g,"\\'")}') " class="info-btn">i</button>`:''}
               <button onclick="editWeight('${key}',${i})"
-              style="padding:8px 14px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;">
-              ${ex.weight>0?ex.weight+' '+ex.unit:'corpo'}
-            </button>
+                style="padding:7px 12px;background:var(--surface2);border:1px solid var(--border-strong);border-radius:8px;color:var(--text);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;min-width:64px;text-align:center;">
+                ${ex.weight>0?ex.weight+' '+ex.unit:'corpo'}
+              </button>
+            </div>
           </div>`;
         }).join('')}
       </div>`).join('')}

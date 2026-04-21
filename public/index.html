@@ -103,6 +103,36 @@ const LANGS = {
     seeHistory:'Ver historico',
     editWeight:'Editar peso',
     raiseUp:'Subir',
+    autoWeights:'Auto-ajuste de pesos',
+    autoWeightsDesc:'A cada 14 dias, o app analisa seu historico e ajusta os pesos automaticamente.',
+    autoWeightsManualDesc:'Voce controla quando ajustar. Um botao aparece a cada 7 dias.',
+    autoWeightsNote:'Se deixar manual, voce precisara registrar suas series normalmente. O botao de ajuste aparece na aba Pesos.',
+    autoWeightsBtn:'Revisar e ajustar pesos agora',
+    autoWeightsLastRun:'Ultimo ajuste automatico:',
+    autoWeightsDue:'Ajuste disponivel!',
+    autoWeightsNotDue:'Proximo ajuste em',
+    autoWeightsDays:'dias',
+    autoBle:'Auto-conectar Bluetooth',
+    autoBleDesc:'Se encontrar um sensor GymApp, conecta automaticamente durante o treino.',
+    bleFound:'Sensor encontrado!',
+    bleFoundDesc:'Encontramos um dispositivo GymApp. Este e o seu sensor?',
+    bleTestMove:'Faca um movimento com o',
+    bleArm:'braco',
+    bleLeg:'perna',
+    bleTestBtn:'Testar agora',
+    bleIsArm:'E do braco',
+    bleIsLeg:'E da perna',
+    bleNotMine:'Nao e o meu',
+    bleConnected:'Sensor conectado',
+    bleDisconnected:'Sensor desconectado',
+    bleTestBluetooth:'Testar Bluetooth',
+    bleArmDevice:'Sensor do braco',
+    bleLegDevice:'Sensor da perna',
+    bleNone:'Nenhum',
+    bleSettings:'Dispositivos Bluetooth',
+    numSets:'Series por exercicio',
+    numSetsDesc:'Quantas series voce quer fazer em cada exercicio? (sugerido: 3)',
+    reviewWeights:'Revisar pesos',
     step:'PASSO',
     of:'DE',
     continue:'Continuar',
@@ -214,6 +244,36 @@ const LANGS = {
     seeHistory:'See History',
     editWeight:'Edit Weight',
     raiseUp:'Raise',
+    autoWeights:'Auto weight adjustment',
+    autoWeightsDesc:'Every 14 days, the app reviews your history and adjusts weights automatically.',
+    autoWeightsManualDesc:'You control when to adjust. A button appears every 7 days.',
+    autoWeightsNote:'If set to manual, you need to log your sets normally. The adjust button appears in the Weights tab.',
+    autoWeightsBtn:'Review and adjust weights now',
+    autoWeightsLastRun:'Last auto adjustment:',
+    autoWeightsDue:'Adjustment available!',
+    autoWeightsNotDue:'Next adjustment in',
+    autoWeightsDays:'days',
+    autoBle:'Auto-connect Bluetooth',
+    autoBleDesc:'If a GymApp sensor is found, connects automatically during workout.',
+    bleFound:'Sensor found!',
+    bleFoundDesc:'We found a GymApp device. Is this your sensor?',
+    bleTestMove:'Do a movement with your',
+    bleArm:'arm',
+    bleLeg:'leg',
+    bleTestBtn:'Test now',
+    bleIsArm:'It\'s my arm sensor',
+    bleIsLeg:'It\'s my leg sensor',
+    bleNotMine:'Not mine',
+    bleConnected:'Sensor connected',
+    bleDisconnected:'Sensor disconnected',
+    bleTestBluetooth:'Test Bluetooth',
+    bleArmDevice:'Arm sensor',
+    bleLegDevice:'Leg sensor',
+    bleNone:'None',
+    bleSettings:'Bluetooth Devices',
+    numSets:'Sets per exercise',
+    numSetsDesc:'How many sets per exercise? (suggested: 3)',
+    reviewWeights:'Review weights',
     step:'STEP',
     of:'OF',
     continue:'Continue',
@@ -325,6 +385,36 @@ const LANGS = {
     seeHistory:'Ver historial',
     editWeight:'Editar peso',
     raiseUp:'Subir',
+    autoWeights:'Ajuste automatico de pesos',
+    autoWeightsDesc:'Cada 14 dias, la app revisa tu historial y ajusta los pesos automaticamente.',
+    autoWeightsManualDesc:'Tu controlas cuando ajustar. Un boton aparece cada 7 dias.',
+    autoWeightsNote:'Si lo dejas manual, necesitas registrar tus series normalmente. El boton de ajuste aparece en la pestana Pesos.',
+    autoWeightsBtn:'Revisar y ajustar pesos ahora',
+    autoWeightsLastRun:'Ultimo ajuste automatico:',
+    autoWeightsDue:'Ajuste disponible!',
+    autoWeightsNotDue:'Proximo ajuste en',
+    autoWeightsDays:'dias',
+    autoBle:'Auto-conectar Bluetooth',
+    autoBleDesc:'Si encuentra un sensor GymApp, se conecta automaticamente durante el entrenamiento.',
+    bleFound:'Sensor encontrado!',
+    bleFoundDesc:'Encontramos un dispositivo GymApp. Es tu sensor?',
+    bleTestMove:'Haz un movimiento con tu',
+    bleArm:'brazo',
+    bleLeg:'pierna',
+    bleTestBtn:'Probar ahora',
+    bleIsArm:'Es mi sensor de brazo',
+    bleIsLeg:'Es mi sensor de pierna',
+    bleNotMine:'No es el mio',
+    bleConnected:'Sensor conectado',
+    bleDisconnected:'Sensor desconectado',
+    bleTestBluetooth:'Probar Bluetooth',
+    bleArmDevice:'Sensor de brazo',
+    bleLegDevice:'Sensor de pierna',
+    bleNone:'Ninguno',
+    bleSettings:'Dispositivos Bluetooth',
+    numSets:'Series por ejercicio',
+    numSetsDesc:'Cuantas series por ejercicio? (sugerido: 3)',
+    reviewWeights:'Revisar pesos',
     step:'PASO',
     of:'DE',
     continue:'Continuar',
@@ -432,6 +522,8 @@ const S={
   addLog:l=>{const logs=S.logs();logs.push(l);S.set('ga_logs',logs);},
   lang:()=>S.get('ga_lang','pt'),
   unit:()=>S.get('ga_unit','lb'),
+  settings:()=>S.get('ga_settings',{autoWeights:true,autoBle:true,numSets:3,bleArm:null,bleLeg:null,lastAutoWeights:null}),
+  saveSettings:s=>S.set('ga_settings',s),
 };
 const T=()=>LANGS[S.lang()]||LANGS.pt;
 const $=id=>document.getElementById(id);
@@ -670,6 +762,125 @@ function checkReturnWarning() {
   return (now - last) > 7 * 24 * 60 * 60 * 1000;
 }
 
+// ─── AUTO WEIGHT REVIEW ──────────────────────────────────────────────────────
+// Auto mode: runs every 14 days automatically
+// Manual mode: button available every 7 days
+function checkAutoWeightsDue() {
+  const cfg = S.settings();
+  const last = cfg.lastAutoWeights ? new Date(cfg.lastAutoWeights) : null;
+  const now = new Date();
+  const intervalDays = cfg.autoWeights ? 14 : 7;
+  if(!last) return true;
+  return (now - last) > intervalDays * 24 * 60 * 60 * 1000;
+}
+
+function daysUntilNextWeightReview() {
+  const cfg = S.settings();
+  const last = cfg.lastAutoWeights ? new Date(cfg.lastAutoWeights) : null;
+  if(!last) return 0;
+  const intervalDays = cfg.autoWeights ? 14 : 7;
+  const diff = intervalDays - Math.floor((new Date() - last) / (24*60*60*1000));
+  return Math.max(0, diff);
+}
+
+function runAutoWeightReview() {
+  const logs = S.logs();
+  const wk = S.workouts();
+  if(!wk || !logs.length) return false;
+  const u = S.user();
+  const goal = u?.goal || 'grow';
+  let changed = false;
+  // Look at last 14 days of logs
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 14);
+  const recentLogs = logs.filter(l => new Date(l.date) >= cutoff);
+  if(!recentLogs.length) return false;
+
+  Object.keys(wk).forEach(key => {
+    wk[key].forEach(ex => {
+      if(ex.unit === 'corpo' || ex.unit === 'level') return;
+      // Gather all reps for this exercise in recent logs
+      const allSessions = recentLogs
+        .map(l => (l.exercises||[]).find(e => e.name === ex.name && e.weight === ex.weight))
+        .filter(Boolean);
+      if(allSessions.length < 1) return;
+      const thr = ex.type === 'legs' ? 14 : 12;
+      const sessionsAbove = allSessions.filter(s => {
+        const r2 = s.reps[1]||0, r3 = s.reps[2]||0;
+        return r2 >= thr && (r3 === 0 || r3 >= thr);
+      });
+      const sessionsNeeded = goal === 'build' ? 1 : 2;
+      if(sessionsAbove.length >= sessionsNeeded) {
+        const inc = ex.type === 'legs' ? 5 : 2.5;
+        ex.weight = Math.round((ex.weight + inc) / 2.5) * 2.5;
+        changed = true;
+      }
+    });
+  });
+  if(changed) S.saveWorkouts(wk);
+  const cfg = S.settings();
+  cfg.lastAutoWeights = new Date().toISOString();
+  S.saveSettings(cfg);
+  return changed;
+}
+
+// ─── BLUETOOTH (Web Bluetooth API) ──────────────────────────────────────────
+let bleState = { armDevice: null, legDevice: null, scanning: false };
+
+async function bleScan(onFound) {
+  if(!navigator.bluetooth) return null;
+  try {
+    const device = await navigator.bluetooth.requestDevice({
+      acceptAllDevices: true,
+      optionalServices: ['battery_service']
+    });
+    if(onFound) onFound(device);
+    return device;
+  } catch(e) { return null; }
+}
+
+function showBleFoundPopup(device) {
+  const t = T();
+  const cfg = S.settings();
+  const ov = document.createElement('div');
+  ov.className = 'overlay fade-in';
+  ov.id = 'ble-found-ov';
+  ov.innerHTML = `<div class="sheet" style="text-align:center;">
+    <div class="sheet-handle"></div>
+    <div style="font-size:40px;margin-bottom:12px;">&#128268;</div>
+    <p style="font-size:20px;font-weight:800;margin-bottom:6px;">${t.bleFound}</p>
+    <p style="color:var(--text2);font-size:14px;margin-bottom:6px;">${device.name||'GymApp Sensor'}</p>
+    <p style="color:var(--text2);font-size:13px;margin-bottom:20px;">${t.bleFoundDesc}</p>
+    <p style="color:var(--text3);font-size:13px;margin-bottom:12px;">${t.bleTestMove}:</p>
+    <div style="display:flex;gap:10px;margin-bottom:16px;">
+      <button class="btn btn-secondary" style="flex:1;" onclick="bleAssign('arm','${device.id||''}','${(device.name||'').replace(/'/g,"\\'")}')">
+        <span style="font-size:20px;">&#128170;</span><br><span style="font-size:13px;">${t.bleIsArm}</span>
+      </button>
+      <button class="btn btn-secondary" style="flex:1;" onclick="bleAssign('leg','${device.id||''}','${(device.name||'').replace(/'/g,"\\'")}')">
+        <span style="font-size:20px;">&#129463;</span><br><span style="font-size:13px;">${t.bleIsLeg}</span>
+      </button>
+    </div>
+    <button class="btn btn-ghost" onclick="document.getElementById('ble-found-ov')?.remove()">${t.bleNotMine}</button>
+  </div>`;
+  ov.onclick = e => { if(e.target===ov) ov.remove(); };
+  document.body.appendChild(ov);
+}
+
+window.bleAssign = function(type, id, name) {
+  const cfg = S.settings();
+  if(type === 'arm') cfg.bleArm = {id, name};
+  else cfg.bleLeg = {id, name};
+  S.saveSettings(cfg);
+  document.getElementById('ble-found-ov')?.remove();
+  const t = T();
+  // Show brief confirmation
+  const toast = document.createElement('div');
+  toast.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--lime);color:#0c0c0e;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:700;z-index:999;';
+  toast.textContent = `${type==='arm'?'💪':'🦵'} ${t.bleConnected}`;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 2500);
+};
+
 // ─── EXERCISE INFO DATABASE ──────────────────────────────────────────────────
 const EX_INFO = {
   'Precor Pulldown 304':{muscles:'Grande dorsal, biceps, romboides',howto:['Sente-se com as coxas firmes sob o apoio. Segure a barra com pegada pronada, maos um pouco mais largas que os ombros.','Inspire, puxe a barra em direcao ao peito superior mantendo o tronco levemente inclinado para tras (~15 graus).','Contraia o dorsal no ponto final — cotovelos apontando para baixo e para tras.','Solte de forma controlada ate os bracos ficarem quase estendidos. Nao deixe o peso cair.'],tips:'Evite balancar o tronco. O movimento deve vir do cotovelo, nao da mao.',caution:null},
@@ -700,14 +911,69 @@ window.showExInfo = function(exName) {
   const info = EX_INFO[exName];
   if(!info) return;
   const t = T();
+
+  // Simple exercise figure SVGs by movement type
+  const EX_FIGURES = {
+    pull: `<svg viewBox="0 0 80 80" width="80" height="80" style="display:block;margin:0 auto;">
+      <circle cx="40" cy="14" r="8" fill="var(--lime)" opacity=".9"/>
+      <line x1="40" y1="22" x2="40" y2="48" stroke="var(--lime)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="40" y1="30" x2="20" y2="20" stroke="var(--lime)" stroke-width="3" stroke-linecap="round" class="arm-l"/>
+      <line x1="40" y1="30" x2="60" y2="20" stroke="var(--lime)" stroke-width="3" stroke-linecap="round" class="arm-r"/>
+      <line x1="40" y1="48" x2="28" y2="66" stroke="var(--lime)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="40" y1="48" x2="52" y2="66" stroke="var(--lime)" stroke-width="3" stroke-linecap="round"/>
+    </svg>`,
+    push: `<svg viewBox="0 0 80 80" width="80" height="80" style="display:block;margin:0 auto;">
+      <circle cx="40" cy="14" r="8" fill="var(--lime)" opacity=".9"/>
+      <line x1="40" y1="22" x2="40" y2="48" stroke="var(--lime)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="40" y1="30" x2="16" y2="36" stroke="var(--lime)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="40" y1="30" x2="64" y2="36" stroke="var(--lime)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="40" y1="48" x2="28" y2="66" stroke="var(--lime)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="40" y1="48" x2="52" y2="66" stroke="var(--lime)" stroke-width="3" stroke-linecap="round"/>
+    </svg>`,
+    curl: `<svg viewBox="0 0 80 80" width="80" height="80" style="display:block;margin:0 auto;">
+      <circle cx="40" cy="14" r="8" fill="var(--lime)" opacity=".9"/>
+      <line x1="40" y1="22" x2="40" y2="48" stroke="var(--lime)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="40" y1="32" x2="22" y2="38" stroke="var(--lime)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="22" y1="38" x2="18" y2="24" stroke="var(--lime)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="40" y1="32" x2="58" y2="38" stroke="var(--lime)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="58" y1="38" x2="62" y2="24" stroke="var(--lime)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="40" y1="48" x2="28" y2="66" stroke="var(--lime)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="40" y1="48" x2="52" y2="66" stroke="var(--lime)" stroke-width="3" stroke-linecap="round"/>
+    </svg>`,
+    leg: `<svg viewBox="0 0 80 80" width="80" height="80" style="display:block;margin:0 auto;">
+      <circle cx="40" cy="14" r="8" fill="var(--lime)" opacity=".9"/>
+      <line x1="40" y1="22" x2="40" y2="44" stroke="var(--lime)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="40" y1="30" x2="24" y2="36" stroke="var(--lime)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="40" y1="30" x2="56" y2="36" stroke="var(--lime)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="40" y1="44" x2="32" y2="58" stroke="var(--lime)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="32" y1="58" x2="24" y2="70" stroke="var(--lime)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="40" y1="44" x2="48" y2="58" stroke="var(--lime)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="48" y1="58" x2="56" y2="70" stroke="var(--lime)" stroke-width="3" stroke-linecap="round"/>
+    </svg>`,
+    core: `<svg viewBox="0 0 80 80" width="80" height="80" style="display:block;margin:0 auto;">
+      <circle cx="40" cy="18" r="8" fill="var(--lime)" opacity=".9"/>
+      <path d="M40 26 Q30 44 20 50" stroke="var(--lime)" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <line x1="20" y1="50" x2="14" y2="42" stroke="var(--lime)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="20" y1="50" x2="28" y2="58" stroke="var(--lime)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="28" y1="58" x2="36" y2="68" stroke="var(--lime)" stroke-width="3" stroke-linecap="round"/>
+    </svg>`,
+  };
+
+  const exLib = EX_LIBRARY[exName];
+  const figKey = exLib?.group === 'arms' ? 'curl' : exLib?.type === 'legs' ? 'leg' : exLib?.type === 'core' ? 'core' : exLib?.group === 'push' ? 'push' : 'pull';
+  const figure = EX_FIGURES[figKey] || EX_FIGURES.pull;
+
   const ov = document.createElement('div');
   ov.className = 'overlay fade-in'; ov.id = 'exinfo-ov';
   ov.innerHTML = `<div class="sheet" style="max-height:88vh;overflow-y:auto;">
     <div class="sheet-handle"></div>
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;">
-      <div>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:12px;">
+      <div style="flex:1;">
         <p style="font-size:18px;font-weight:800;line-height:1.2;">${exName}</p>
         <p style="color:var(--text3);font-size:12px;margin-top:4px;">${info.muscles}</p>
+      </div>
+      <div style="background:var(--lime-dim);border-radius:12px;padding:10px;flex-shrink:0;">
+        ${figure}
       </div>
     </div>
     ${info.caution ? `<div style="background:var(--amber-dim);border-radius:10px;padding:10px 14px;margin-bottom:16px;"><p style="color:var(--amber);font-size:13px;font-weight:600;">! ${info.caution}</p></div>` : ''}
@@ -751,6 +1017,8 @@ function bnav(active) {
 // ═══════════════════════════════════════════════════════════════════════════
 function renderDisclaimer(onAccept) {
   const t = T();
+  const cfg = S.settings();
+  const isFirst = !cfg.disclaimerSeen;
   app.innerHTML = `<div class="fade-in px pt-safe" style="padding-bottom:40px;min-height:100vh;display:flex;flex-direction:column;justify-content:center;">
     <div style="margin-bottom:28px;text-align:center;">
       <div style="font-size:48px;margin-bottom:16px;">&#9888;&#65039;</div>
@@ -759,12 +1027,107 @@ function renderDisclaimer(onAccept) {
     <div class="card-sm" style="margin-bottom:20px;background:var(--amber-dim);border-color:rgba(245,166,35,.2);">
       <p style="font-size:14px;color:var(--amber);line-height:1.7;">${t.disclaimerText}</p>
     </div>
-    <div class="card-inset" style="margin-bottom:24px;background:var(--lime-dim);border-color:var(--lime-border);">
+    <div class="card-inset" style="margin-bottom:20px;background:var(--lime-dim);border-color:var(--lime-border);">
       <p style="font-size:13px;color:var(--lime);line-height:1.6;">Sempre verifique os pesos antes de cada exercicio. Se estiver muito pesado, diminua. Sua seguranca e o mais importante.</p>
     </div>
-    <button class="btn btn-primary" onclick="(${onAccept.toString()})()">${t.iUnderstand}</button>
+
+    <!-- TOGGLES DE CONFIGURACAO -->
+    <div class="card" style="margin-bottom:20px;">
+
+      <!-- Auto-ajuste de pesos -->
+      <div style="padding:16px;border-bottom:1px solid var(--border);">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;">
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <p style="font-size:15px;font-weight:700;">&#129504; ${t.autoWeights}</p>
+              <button onclick="showInfo('autoWeights')" style="width:20px;height:20px;border-radius:50%;background:var(--surface2);border:1px solid var(--border-strong);color:var(--text2);font-size:11px;font-weight:700;cursor:pointer;font-style:italic;flex-shrink:0;">i</button>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button id="aw-auto" onclick="setAutoWeights(true)" style="padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid ${cfg.autoWeights?'var(--lime)':'var(--border)'};background:${cfg.autoWeights?'var(--lime-dim)':'transparent'};color:${cfg.autoWeights?'var(--lime)':'var(--text3)'};">Auto</button>
+            <button id="aw-manual" onclick="setAutoWeights(false)" style="padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid ${!cfg.autoWeights?'var(--lime)':'var(--border)'};background:${!cfg.autoWeights?'var(--lime-dim)':'transparent'};color:${!cfg.autoWeights?'var(--lime)':'var(--text3)'};">Manual</button>
+          </div>
+        </div>
+        <p id="aw-desc" style="font-size:12px;color:var(--text3);line-height:1.5;">${cfg.autoWeights?t.autoWeightsDesc:t.autoWeightsManualDesc}</p>
+      </div>
+
+      <!-- Auto-conectar Bluetooth -->
+      <div style="padding:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;">
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <p style="font-size:15px;font-weight:700;">&#128268; ${t.autoBle}</p>
+              <button onclick="showInfo('autoBle')" style="width:20px;height:20px;border-radius:50%;background:var(--surface2);border:1px solid var(--border-strong);color:var(--text2);font-size:11px;font-weight:700;cursor:pointer;font-style:italic;flex-shrink:0;">i</button>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button id="ble-on" onclick="setAutoBle(true)" style="padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid ${cfg.autoBle?'var(--lime)':'var(--border)'};background:${cfg.autoBle?'var(--lime-dim)':'transparent'};color:${cfg.autoBle?'var(--lime)':'var(--text3)'};">Sim</button>
+            <button id="ble-off" onclick="setAutoBle(false)" style="padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid ${!cfg.autoBle?'var(--lime)':'var(--border)'};background:${!cfg.autoBle?'var(--lime-dim)':'transparent'};color:${!cfg.autoBle?'var(--lime)':'var(--text3)'};">Nao</button>
+          </div>
+        </div>
+        <p style="font-size:12px;color:var(--text3);line-height:1.5;">${t.autoBleDesc}</p>
+      </div>
+    </div>
+
+    <!-- Numero de series -->
+    <div class="card-sm" style="margin-bottom:8px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+        <div>
+          <p style="font-size:15px;font-weight:700;">&#128170; ${t.numSets}</p>
+          <p style="font-size:12px;color:var(--text3);margin-top:2px;">${t.numSetsDesc}</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button onclick="bumpSets(-1)" style="width:32px;height:32px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;">−</button>
+          <span id="sets-val" style="font-size:22px;font-weight:800;color:var(--lime);min-width:28px;text-align:center;">${cfg.numSets||3}</span>
+          <button onclick="bumpSets(1)" style="width:32px;height:32px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;">+</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nota sobre manual -->
+    <div id="aw-note" style="display:${cfg.autoWeights?'none':'block'};margin-bottom:16px;">
+      <p style="font-size:12px;color:var(--text3);line-height:1.6;padding:10px 14px;background:var(--surface2);border-radius:10px;border-left:3px solid var(--amber);">&#9432; ${t.autoWeightsNote}</p>
+    </div>
+
+    <button class="btn btn-primary" onclick="disclaimerAccept(${onAccept.toString()})">${t.iUnderstand}</button>
   </div>`;
 }
+
+window.setAutoWeights = function(val) {
+  const cfg = S.settings(); cfg.autoWeights = val; S.saveSettings(cfg);
+  const t = T();
+  document.getElementById('aw-auto').style.cssText = `padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid ${val?'var(--lime)':'var(--border)'};background:${val?'var(--lime-dim)':'transparent'};color:${val?'var(--lime)':'var(--text3)'};`;
+  document.getElementById('aw-manual').style.cssText = `padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid ${!val?'var(--lime)':'var(--border)'};background:${!val?'var(--lime-dim)':'transparent'};color:${!val?'var(--lime)':'var(--text3)'};`;
+  document.getElementById('aw-desc').textContent = val ? t.autoWeightsDesc : t.autoWeightsManualDesc;
+  document.getElementById('aw-note').style.display = val ? 'none' : 'block';
+};
+window.setAutoBle = function(val) {
+  const cfg = S.settings(); cfg.autoBle = val; S.saveSettings(cfg);
+  document.getElementById('ble-on').style.cssText = `padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid ${val?'var(--lime)':'var(--border)'};background:${val?'var(--lime-dim)':'transparent'};color:${val?'var(--lime)':'var(--text3)'};`;
+  document.getElementById('ble-off').style.cssText = `padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid ${!val?'var(--lime)':'var(--border)'};background:${!val?'var(--lime-dim)':'transparent'};color:${!val?'var(--lime)':'var(--text3)'};`;
+};
+window.bumpSets = function(d) {
+  const cfg = S.settings();
+  cfg.numSets = Math.max(1, Math.min(6, (cfg.numSets||3) + d));
+  S.saveSettings(cfg);
+  const el = document.getElementById('sets-val');
+  if(el) el.textContent = cfg.numSets;
+};
+window.showInfo = function(key) {
+  const t = T();
+  const msgs = {
+    autoWeights: `<p style="font-size:16px;font-weight:800;margin-bottom:12px;">&#129504; ${t.autoWeights}</p><p style="font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:10px;"><strong style="color:var(--lime);">Auto:</strong> ${t.autoWeightsDesc}</p><p style="font-size:14px;color:var(--text2);line-height:1.7;"><strong style="color:var(--text);">Manual:</strong> ${t.autoWeightsManualDesc}</p>`,
+    autoBle: `<p style="font-size:16px;font-weight:800;margin-bottom:12px;">&#128268; ${t.autoBle}</p><p style="font-size:14px;color:var(--text2);line-height:1.7;">${t.autoBleDesc}</p>`,
+  };
+  const ov = document.createElement('div'); ov.className = 'overlay fade-in'; ov.id = 'info-ov';
+  ov.innerHTML = `<div class="sheet"><div class="sheet-handle"></div>${msgs[key]||''}<button class="btn btn-ghost" style="margin-top:20px;" onclick="document.getElementById('info-ov')?.remove()">OK</button></div>`;
+  ov.onclick = e => { if(e.target===ov) ov.remove(); };
+  document.body.appendChild(ov);
+};
+window.disclaimerAccept = function(cb) {
+  const cfg = S.settings(); cfg.disclaimerSeen = true; S.saveSettings(cfg);
+  cb();
+};
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ONBOARDING
@@ -1320,7 +1683,24 @@ function weightsTab(u, schedMap) {
   const wk=S.workouts()||{},t=T();
   const keys=Object.keys(wk);
   const DAY_NAMES=t.days;
+  const cfg=S.settings();
+  const isDue=checkAutoWeightsDue();
+  const daysLeft=daysUntilNextWeightReview();
+
+  const manualBanner = !cfg.autoWeights && isDue ? `
+    <div style="background:var(--lime-dim);border:1px solid var(--lime-border);border-radius:12px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+      <div>
+        <p style="font-size:14px;font-weight:700;color:var(--lime);">&#129504; ${t.autoWeightsDue}</p>
+        <p style="font-size:12px;color:var(--lime);opacity:.8;margin-top:2px;">${t.autoWeightsBtn}</p>
+      </div>
+      <button onclick="doManualWeightReview()" style="padding:8px 14px;background:var(--lime);border:none;border-radius:10px;color:#0c0c0e;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;">${t.reviewWeights}</button>
+    </div>` : !cfg.autoWeights && daysLeft > 0 ? `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 16px;margin-bottom:14px;">
+      <p style="font-size:13px;color:var(--text3);">&#129504; ${t.autoWeightsNotDue} <strong style="color:var(--text2);">${daysLeft} ${t.autoWeightsDays}</strong></p>
+    </div>` : '';
+
   return `<div style="display:flex;flex-direction:column;gap:12px;">
+    ${manualBanner}
     ${keys.map(key=>`
       <div class="card">
         <div style="padding:14px 16px 4px;border-bottom:1px solid var(--border);">
@@ -1349,6 +1729,21 @@ function weightsTab(u, schedMap) {
       </div>`).join('')}
   </div>`;
 }
+
+window.doManualWeightReview = function() {
+  const t = T();
+  const changed = runAutoWeightReview();
+  const ov = document.createElement('div'); ov.className = 'overlay fade-in'; ov.id = 'wr-ov';
+  ov.innerHTML = `<div class="sheet" style="text-align:center;">
+    <div class="sheet-handle"></div>
+    <div style="font-size:40px;margin-bottom:12px;">${changed?'&#129504;':'&#9989;'}</div>
+    <p style="font-size:18px;font-weight:800;margin-bottom:8px;">${changed?t.weightsAdjusted:'Pesos ja otimizados!'}</p>
+    <p style="color:var(--text2);font-size:13px;margin-bottom:20px;">${changed?'Os pesos foram atualizados com base no seu historico recente.':'Continue treinando para acumular mais dados.'}</p>
+    <button class="btn btn-primary" onclick="document.getElementById('wr-ov')?.remove();renderDashboard('weights')">OK</button>
+  </div>`;
+  ov.onclick = e => { if(e.target===ov) ov.remove(); };
+  document.body.appendChild(ov);
+};
 
 window.editWeight = function(key,i) {
   const wk=S.workouts(),ex=wk[key][i],t=T();
@@ -1401,6 +1796,15 @@ window.startWorkout = function(key) {
   let cur=0, sessionData=[];
   const isFirstSession=S.logs().filter(l=>l.workout===key).length===0;
   const t=T();
+  const cfg=S.settings();
+  const NUM_SETS=cfg.numSets||3;
+
+  // Auto BLE scan if enabled and no device paired yet
+  if(cfg.autoBle && navigator.bluetooth && !cfg.bleArm && !cfg.bleLeg) {
+    setTimeout(()=>{
+      bleScan(device => showBleFoundPopup(device));
+    }, 1500);
+  }
 
   function render() {
     const ex=exercises[cur];
@@ -1438,7 +1842,7 @@ window.startWorkout = function(key) {
         </div>
 
         <div class="card" style="margin-bottom:20px;">
-          ${[0,1,2].map(i=>{
+          ${Array.from({length:NUM_SETS},(_,i)=>{
             const done=reps[i]!==undefined,active=i===reps.length;
             return `<div class="set-row ${done?'done':active?'active':''}" onclick="${done?`editRepI(${i})`:''}" >
               <div style="width:34px;height:34px;border-radius:10px;background:${done?'var(--lime)':active?'var(--lime)':'var(--surface2)'};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:${done||active?'#0c0c0e':'var(--text3)'};">S${i+1}</div>
@@ -1450,7 +1854,7 @@ window.startWorkout = function(key) {
           }).join('')}
         </div>
 
-        ${reps.length<3?`
+        ${reps.length<NUM_SETS?`
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
             <p style="font-size:14px;font-weight:600;color:var(--text2);">${t.series} ${reps.length+1} — ${t.reps}?</p>
             <button onclick="openAutoCount()" style="padding:6px 12px;background:var(--lime-dim);border:none;border-radius:20px;color:var(--lime);font-size:12px;font-weight:700;cursor:pointer;">&#128241; Auto</button>
@@ -1582,7 +1986,7 @@ window.startWorkout = function(key) {
 
   window.addSet = function(r) {
     if(!sessionData[cur]) sessionData[cur]={name:exercises[cur].name,weight:exercises[cur].weight,unit:exercises[cur].unit,reps:[]};
-    if(sessionData[cur].reps.length<3){sessionData[cur].reps.push(r);render();}
+    if(sessionData[cur].reps.length<NUM_SETS){sessionData[cur].reps.push(r);render();}
   };
   window.addCustom = function(){const v=parseInt($('cr')?.value);if(v>0)addSet(v);};
   window.nextEx = function(){cur<exercises.length-1?(cur++,render()):finishWorkout();};
@@ -1805,6 +2209,17 @@ window.renderProfile = function() {
       </div>
     </div>
 
+    <!-- BLUETOOTH SECTION -->
+    <div class="card" style="margin-bottom:12px;" id="ble-card">
+      <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+        <p style="font-size:15px;font-weight:700;">&#128268; ${t.bleSettings}</p>
+        <button onclick="profileBleScan()" style="padding:6px 12px;background:var(--lime-dim);border:none;border-radius:8px;color:var(--lime);font-size:12px;font-weight:600;cursor:pointer;">${t.bleTestBluetooth}</button>
+      </div>
+      <div id="ble-devices" style="padding:12px 16px;display:flex;flex-direction:column;gap:10px;">
+        ${renderBleDevices(t)}
+      </div>
+    </div>
+
     <div class="card-sm" style="margin-bottom:10px;">
       <button onclick="resetWk()" style="width:100%;padding:10px;background:transparent;border:none;color:var(--amber);font-size:14px;font-weight:600;cursor:pointer;text-align:left;">${t.resetWeights}</button>
     </div>
@@ -1826,6 +2241,55 @@ window.saveProfile = function() {
   S.set('ga_user',u);
   S.set('ga_unit',$('p_unit').value);
   renderProfile();
+};
+
+function renderBleDevices(t) {
+  const cfg = S.settings();
+  return `
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:20px;">&#128170;</span>
+        <div>
+          <p style="font-size:14px;font-weight:600;">${t.bleArmDevice}</p>
+          <p style="font-size:12px;color:var(--text3);">${cfg.bleArm?cfg.bleArm.name:t.bleNone}</p>
+        </div>
+      </div>
+      ${cfg.bleArm?`<button onclick="removeBle('arm')" style="padding:4px 10px;background:var(--red-dim);border:none;border-radius:6px;color:var(--red);font-size:12px;font-weight:600;cursor:pointer;">&#10005;</button>`:''}
+    </div>
+    <div style="height:1px;background:var(--border);"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:20px;">&#129463;</span>
+        <div>
+          <p style="font-size:14px;font-weight:600;">${t.bleLegDevice}</p>
+          <p style="font-size:12px;color:var(--text3);">${cfg.bleLeg?cfg.bleLeg.name:t.bleNone}</p>
+        </div>
+      </div>
+      ${cfg.bleLeg?`<button onclick="removeBle('leg')" style="padding:4px 10px;background:var(--red-dim);border:none;border-radius:6px;color:var(--red);font-size:12px;font-weight:600;cursor:pointer;">&#10005;</button>`:''}
+    </div>`;
+}
+
+window.removeBle = function(type) {
+  const cfg = S.settings();
+  if(type==='arm') cfg.bleArm = null;
+  else cfg.bleLeg = null;
+  S.saveSettings(cfg);
+  const el = document.getElementById('ble-devices');
+  if(el) el.innerHTML = renderBleDevices(T());
+};
+
+window.profileBleScan = function() {
+  const t = T();
+  bleScan(device => {
+    if(device) showBleFoundPopup(device);
+    else {
+      const toast = document.createElement('div');
+      toast.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;z-index:999;';
+      toast.textContent = '&#128268; Nenhum dispositivo encontrado';
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 2500);
+    }
+  });
 };
 
 window.editSchedule = function() {
@@ -1883,7 +2347,14 @@ window.clearAll = function() {
     const wk=buildWorkouts(u.focus||'full',u.trainDays||3,u.level||'int',u.weight||80);
     S.saveWorkouts(wk);renderDashboard();
   }
-  else{renderDashboard();}
+  else{
+    // Auto weight review if enabled and due
+    const cfg=S.settings();
+    if(cfg.autoWeights && checkAutoWeightsDue() && S.logs().length > 0) {
+      runAutoWeightReview();
+    }
+    renderDashboard();
+  }
 })();
 </script>
 </body>

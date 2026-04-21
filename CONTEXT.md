@@ -1,31 +1,27 @@
-# GymApp — Context Window para nova sessão
+# GymApp — Context Window
 
 ## Quem é o usuário
 - Rafael, brasileiro, mora nos EUA
-- Construtor de produtos, surfa a onda de AI
-- Duas empresas em desenvolvimento:
-  - **Atendro AI** — consultoria de AI para empresas
-  - **Nova empresa (sem nome ainda)** — vende apps de AI para consumidores
-- O GymApp é o produto principal da nova empresa
-- Modelo de negócio pensado: hardware DIY (ESP32 + acelerômetro, ~$15 custo, vender por $49) + app ($5/mês ou grátis com hardware)
+- Duas empresas: **Atendro AI** (consultoria AI) e **nova empresa sem nome** (apps AI para consumidores)
+- GymApp é o produto principal da nova empresa
+- Modelo: hardware DIY (ESP32 + acelerômetro, ~$15 custo, vender $49) + app ($5/mês ou grátis com hardware)
+- Público-alvo: EUA + Brasil + Latam → app em PT/EN/ES
 
 ---
 
-## Stack do projeto
-- **Frontend:** HTML + CSS + JS vanilla (single file `public/index.html`)
+## Stack
+- **Frontend:** HTML + CSS + JS vanilla — **TUDO em um único arquivo: `public/index.html`**
 - **Deploy:** Cloudflare Pages (não Workers)
-- **Repo GitHub:** `rafaraujo10-dev/gym-app`
+- **Repo:** `rafaraujo10-dev/gym-app`
 - **URL live:** `https://gym-app-8ea.pages.dev/`
-- **Deploy automático:** git push → Cloudflare atualiza em ~1 min
-- **Sem framework, sem build step** — tudo em um arquivo
+- **Deploy:** `git push` → Cloudflare atualiza em ~1 min
+- **Sem framework, sem build step**
 
----
-
-## Estrutura do projeto
+## Estrutura
 ```
 gym-app/
 ├── public/
-│   ├── index.html   ← TODO o app está aqui
+│   ├── index.html   ← TODO o app está aqui (~1890 linhas)
 │   └── manifest.json
 ├── wrangler.toml
 └── package.json
@@ -33,78 +29,97 @@ gym-app/
 
 ---
 
-## Estado atual do app (o que já foi construído)
+## Estado atual do app (último commit: b490cde)
 
-### Design
-- Dark premium theme (inspirado em Strong / Whoop)
-- Paleta: `--bg:#0c0c0e`, `--surface:#141416`, `--lime:#c8f135` (acento principal)
-- Zero emojis — SVG icons na nav, texto limpo
-- Bottom nav com 4 abas: Inicio / Historico / Pesos / Perfil
+### Funcionalidades implementadas
 
-### Onboarding (6 passos)
-1. Nome + altura + peso + sexo biológico
-2. Nível (Iniciante/Intermediário/Avançado) + Foco (Full Body / Upper / Lower)
-3. Agenda — seleciona dias da semana, cada dia recebe letra A/B/C/D/E
-4. Academia — opção foto/vídeo (EM BREVE), seleção manual de equipamentos, ou lista padrão
-5. Preview dos pesos estimados (calculados por peso corporal + nível)
-6. Confirmação + lançamento
+**Onboarding (6 passos)**
+1. Nome + altura + peso + idade + sexo + unidade (lb/kg) + idioma (PT/EN/ES)
+2. Nível (Dia 1 / Iniciante / Intermediário / Avançado) + Objetivo (Manter/Crescer/Bodybuilding) + Foco (Full/Upper/Lower)
+3. Agenda — dias da semana, cada dia recebe letra A/B/C/D/E
+4. Academia — EM BREVE (foto/vídeo), seleção manual, lista padrão Genesis+Precor, ou por marca (Genesis/Precor/Free)
+5. Preview dos pesos estimados
+6. Confirmação → Disclaimer de segurança → Dashboard
 
-### Dashboard (aba Inicio)
-- Card do treino de hoje com letra grande em lime
-- Botão "Escolher treino diferente" → modal com A/B/C/D/E
-- Stats: Sequência de dias + treinos na semana
-- Barra da semana mostrando dias de treino com letra correta
+**Dashboard (aba Inicio)**
+- Card do treino de hoje → clica → abre **Summary** (lista exercícios + pesos) → clica "Vamos lá!" → inicia treino
+- Botão "Escolher treino diferente" → modal A/B/C/D/E (também abre summary antes de iniciar)
+- Stats: Streak (calculado corretamente pelo plano) + treinos na semana
+- Barra da semana com checkmark nos dias já treinados
+- Aviso de retorno se >7 dias sem treinar (banner amarelo)
 - Último treino com link para detalhe
 
-### Treino
+**Tela de Treino**
+- Peso do exercício em destaque (lime, grande) — **clicável para editar inline sem sair do treino**
 - Progresso no topo (barra + X/Y)
 - Botão ☰ abre lista de todos exercícios → pode pular para qualquer um
 - 3 séries por exercício, tap para registrar reps
 - Grid de reps rápidas (6,8,10,12,14,15,16,18,20,25) + input manual
 - Tap em série concluída → editar
+- **Botão "Deletar" em cada série registrada**
 - Botão "Auto" → contador automático por acelerômetro (DeviceMotion API)
+- **Botão "Encerrar treino agora"** com confirmação (a qualquer momento)
 - Aviso de cautela para ombro (Max 90°) e ACL
 - Ao finalizar: ajuste automático de pesos baseado nas reps
 
-### Aba Pesos
+**Aba Pesos**
 - Lista todos exercícios por treino (A/B/C...)
-- Botão do peso → sheet para editar (input grande + bumps de ±2.5/±5)
-- Botão `i` → sheet com instruções de execução do exercício
+- Peso em destaque (lime, grande) → sheet para editar (input + bumps ±2.5/±5 em lb, ±1/±2.5 em kg)
+- Botão `i` → sheet com instruções de execução
 - Badge "Subir ↑" quando progressão indica aumento
 
-### Aba Histórico
+**Aba Histórico**
 - Lista dos últimos 30 treinos
 - Tap → detalhe com todos exercícios, pesos e reps de cada série
 
-### Perfil
-- Editar nome, altura, peso, foco
+**Perfil**
+- Editar nome, altura, peso, idade, foco, objetivo
+- Escolher unidade (lb/kg) e idioma (PT/EN/ES)
 - Editar agenda de dias
 - Resetar pesos para estimativa inicial
 - Apagar tudo
 
-### Contador automático de reps (DeviceMotion)
+**Contador automático de reps (DeviceMotion)**
 - Detecção de ciclo completo (ida + volta = 1 rep)
-- Thresholds calibrados por altura da pessoa (comprimento do braço estimado)
+- Thresholds calibrados por altura (comprimento do braço estimado)
 - Perfis por exercício: curl / press / pull / leg / core
 - Cooldown entre reps para evitar dupla contagem
 - Barra de sinal em tempo real
 
-### Lógica de progressão
-- Analisa últimas 2 sessões do mesmo exercício no mesmo peso
-- Upper: 2ª e 3ª série ≥ 12 reps → sugere subir
-- Legs: 2ª e 3ª série ≥ 14 reps → sugere subir
+**Lógica de progressão (por objetivo)**
+- `maintain`: precisa de 2 sessões acima do threshold para subir
+- `grow` (padrão): precisa de 2 sessões acima do threshold
+- `build`: 1 sessão já sobe o peso
+- Upper: threshold 12 reps (2ª e 3ª série)
+- Legs: threshold 14 reps
 - Ajuste automático após primeira sessão baseado nas reps
+
+**Streak**
+- Calculado por `calcStreak(logs, schedMap)` — conta dias do plano completados consecutivamente
+- Não zera em dia de descanso
+- Não conta 2 treinos no mesmo dia como 2
+
+**I18n**
+- Objeto `LANGS` com `pt`, `en`, `es` — todas as strings do app
+- `T()` retorna o objeto do idioma atual
+- `S.lang()` lê de `localStorage ga_lang`
+
+**Unidades**
+- `S.unit()` retorna `'lb'` ou `'kg'` de `localStorage ga_unit`
+- `toDisplay(w)` converte lb→kg para exibição
+- `fromDisplay(w)` converte kg→lb para armazenar
+- `dispW(w)` formata o número
+- Todos os pesos são armazenados internamente em **lb**
 
 ---
 
-## Treinos do Rafael (dados reais)
-- Treina Seg/Qua/Sex (3x/semana), full body
+## Dados do Rafael (pesos reais, treino 3x/semana)
+- Treina Seg/Qua/Sex, full body, treinos A/B/C
 - Academia com equipamentos Genesis (Freemotion) + Precor
 - Histórico de ACL no joelho → progressão conservadora em pernas
 - Ombro direito clica abaixo de 90° → Genesis Multiplane Shoulder limitado
-- Treino A (Seg), B (Qua), C (Sex)
 
-**Treino C (próximo treino):**
+**Treino C (pesos atuais):**
 - Genesis Lat — 70 lb
 - Precor Pulldown 304 — 70 lb
 - Precor Seated Row — 60 lb
@@ -119,22 +134,52 @@ gym-app/
 
 ---
 
-## Bugs conhecidos / pendências
-- [ ] Contador automático ainda pode ser impreciso — precisa de teste real na academia
-- [ ] Foto/vídeo para reconhecer máquinas (EM BREVE — não implementado)
-- [ ] Botão "i" de info nos exercícios durante o treino tem quote escaping frágil
-- [ ] Sessão de pesos foi bugada (div não fechada) — JÁ CORRIGIDO no último commit
+## Variáveis CSS principais
+```
+--bg:#0c0c0e  --surface:#141416  --surface2:#1c1c1f  --surface3:#242428
+--border:#2a2a2e  --border-strong:#3a3a3f
+--text:#f0f0f2  --text2:#a0a0a8  --text3:#606068
+--lime:#c8f135  --lime-dim:#1e2a06  --lime-border:#3a5010
+--amber:#f5a623  --amber-dim:#2a1e06
+--red:#e05252  --red-dim:#2a0a0a
+```
+
+## Classes CSS principais
+```
+.btn .btn-primary .btn-ghost .btn-danger
+.card .card-sm .card-inset
+.badge .badge-lime .badge-amber .badge-neutral
+.set-row .set-row.done .set-row.active
+.rep-grid .rep-btn
+.prog-bar .prog-fill
+.overlay .sheet .sheet-handle
+.ob-step .day-cell .sel-opt
+.hero-card .stat-box .label .bnav .bnav-btn
+```
+
+## localStorage keys
+```
+ga_user     → {name, height, weight, age, sex, level, focus, goal, trainDays, schedule, sessionTime, onboardedAt}
+ga_logs     → [{date (ISO), workout (A/B/C), exercises: [{name, weight, unit, reps:[]}]}]
+ga_workouts → {A:[{name, weight, unit, type, group, caution}], B:[...], C:[...]}
+ga_streak   → number (recalculado via calcStreak após cada treino)
+ga_lang     → 'pt' | 'en' | 'es'
+ga_unit     → 'lb' | 'kg'
+```
 
 ---
 
 ## Próximas features discutidas (não implementadas)
 1. **Hardware BLE** — ESP32 + MPU6050 no punho, conecta via Web Bluetooth API
-2. **Reconhecimento de máquinas por foto/vídeo** — AI via OpenAI Vision
-3. **AI Coach** — análise de progressão via OpenAI (igual ao ROI Analyzer da Atendro)
+2. **Reconhecimento de máquinas por foto/vídeo** — AI via OpenAI Vision (botão "EM BREVE" já existe no onboarding)
+3. **AI Coach** — análise de progressão via OpenAI
 4. **Tornozeleira** — segundo sensor para exercícios de perna
-5. **Landing page** da nova empresa para vender o app + hardware
+5. **Landing page** da nova empresa
 
----
+## Bugs conhecidos / pendências menores
+- [ ] Contador automático ainda pode ser impreciso — precisa de teste real na academia
+- [ ] Foto/vídeo para reconhecer máquinas — não implementado (placeholder existe)
+- [ ] Idioma EN/ES: strings de exercícios e instruções ainda em PT (EX_INFO não foi traduzido)
 
 ## Como fazer deploy
 ```bash
@@ -144,50 +189,3 @@ git commit -m "mensagem"
 git push
 # Cloudflare Pages deploya automaticamente em ~1 min
 ```
-
----
-
-## Variáveis CSS principais
-```css
---bg: #0c0c0e
---surface: #141416
---surface2: #1c1c1f
---surface3: #242428
---border: #2a2a2e
---border-strong: #3a3a3f
---text: #f0f0f2
---text2: #a0a0a8
---text3: #606068
---lime: #c8f135        /* acento principal */
---lime-dim: #1e2a06
---lime-border: #3a5010
---amber: #f5a623
---red: #e05252
-```
-
-## Classes CSS principais
-```
-.btn.btn-primary    → fundo lime, texto preto
-.btn.btn-secondary  → outlined, borda visível
-.btn.btn-ghost      → minimal, borda fina
-.card               → surface + border + radius 16px
-.card-sm            → card com padding 16px
-.badge.badge-lime   → verde
-.badge.badge-amber  → laranja
-.badge.badge-neutral → cinza
-.label              → uppercase, letter-spacing, text3
-.set-row            → linha de série no treino
-.rep-btn            → botão de rep rápida
-.hero-card          → card do treino de hoje
-.stat-box           → caixa de estatística
-```
-
----
-
-## Contexto de negócio
-- Rafael quer vender o app como produto da nova empresa
-- Atendro AI é separada — consultoria, não produto
-- O GymApp pode ser o produto âncora da nova empresa
-- Modelo: hardware + app subscription
-- Público: usuários de academia que querem algo mais inteligente que planilha/ChatGPT
-- Diferencial: contador automático de reps + progressão inteligente + sem Apple Watch necessário

@@ -236,6 +236,24 @@ const LANGS = {
     finishConfirmDesc:'Voce ainda tem exercicios nao concluidos. Deseja finalizar mesmo assim?',
     finishAnyway:'Finalizar mesmo assim',
     keepGoing:'Continuar treinando',
+    aiCoach:'AI Coach',
+    aiCoachDesc:'Analise inteligente do seu historico de treinos',
+    aiCoachRun:'Analisar agora',
+    aiCoachRunning:'Analisando...',
+    aiCoachDone:'Analise concluida',
+    aiCoachApply:'Aplicar sugestoes',
+    aiCoachSkip:'Ignorar',
+    aiCoachError:'Erro ao conectar com AI. Verifique sua conexao.',
+    aiVision:'Identificar maquinas por foto',
+    aiVisionDesc:'Tire uma foto da academia e a IA identifica as maquinas automaticamente',
+    aiVisionBtn:'Tirar foto',
+    aiVisionRunning:'Identificando maquinas...',
+    aiVisionDone:'Maquinas identificadas',
+    aiVisionConfirm:'Confirmar lista',
+    aiVisionError:'Nao foi possivel identificar. Tente outra foto.',
+    tipsTitle:'Como usar o GymApp',
+    tipsClose:'Fechar',
+    selectBrandEquip:'Selecione os equipamentos:',
   },
   en: {
     appName:'GymApp',
@@ -392,6 +410,24 @@ const LANGS = {
     finishConfirmDesc:'You still have incomplete exercises. Do you want to finish anyway?',
     finishAnyway:'Finish Anyway',
     keepGoing:'Keep Training',
+    aiCoach:'AI Coach',
+    aiCoachDesc:'Smart analysis of your workout history',
+    aiCoachRun:'Analyze now',
+    aiCoachRunning:'Analyzing...',
+    aiCoachDone:'Analysis complete',
+    aiCoachApply:'Apply suggestions',
+    aiCoachSkip:'Ignore',
+    aiCoachError:'Could not connect to AI. Check your connection.',
+    aiVision:'Identify machines by photo',
+    aiVisionDesc:'Take a photo of your gym and AI identifies the machines automatically',
+    aiVisionBtn:'Take photo',
+    aiVisionRunning:'Identifying machines...',
+    aiVisionDone:'Machines identified',
+    aiVisionConfirm:'Confirm list',
+    aiVisionError:'Could not identify. Try another photo.',
+    tipsTitle:'How to use GymApp',
+    tipsClose:'Close',
+    selectBrandEquip:'Select equipment:',
   },
   es: {
     appName:'GymApp',
@@ -548,6 +584,24 @@ const LANGS = {
     finishConfirmDesc:'Todavia tienes ejercicios sin completar. Deseas finalizar de todas formas?',
     finishAnyway:'Finalizar de todas formas',
     keepGoing:'Seguir entrenando',
+    aiCoach:'AI Coach',
+    aiCoachDesc:'Analisis inteligente de tu historial de entrenamientos',
+    aiCoachRun:'Analizar ahora',
+    aiCoachRunning:'Analizando...',
+    aiCoachDone:'Analisis completado',
+    aiCoachApply:'Aplicar sugerencias',
+    aiCoachSkip:'Ignorar',
+    aiCoachError:'No se pudo conectar con la IA. Verifica tu conexion.',
+    aiVision:'Identificar maquinas por foto',
+    aiVisionDesc:'Toma una foto del gimnasio y la IA identifica las maquinas automaticamente',
+    aiVisionBtn:'Tomar foto',
+    aiVisionRunning:'Identificando maquinas...',
+    aiVisionDone:'Maquinas identificadas',
+    aiVisionConfirm:'Confirmar lista',
+    aiVisionError:'No se pudo identificar. Intenta con otra foto.',
+    tipsTitle:'Como usar GymApp',
+    tipsClose:'Cerrar',
+    selectBrandEquip:'Selecciona los equipos:',
   }
 };
 
@@ -745,6 +799,152 @@ const MACHINE_STEPS = {
   'Decline Sit-up':             {seq: [0],             unit:'corpo'},
 };
 function seq(min,max,step){const r=[];for(let v=min;v<=max;v=Math.round((v+step)*100)/100)r.push(v);return r;}
+
+// ─── BRAND EQUIPMENT DATABASE ─────────────────────────────────────────────────
+const BRAND_CATALOG = {
+  'Genesis (Freemotion)': {
+    machines: [
+      'Genesis Lat','Genesis Dual Cable','Genesis Chin / Dip Assist','Genesis Multiplane Chest',
+      'Genesis Multiplane Shoulder','Genesis Biceps','Genesis Biceps Preacher',
+      'Genesis Triceps','Genesis Triceps Seated','Genesis Total Quad / Hip',
+      'Genesis Total Glute / Ham','Genesis Multiplane Calf',
+    ]
+  },
+  'Precor': {
+    machines: [
+      'Precor Pulldown 304','Precor Low Row','Precor Seated Row',
+    ]
+  },
+  'Life Fitness': {
+    machines: [
+      'Life Fitness Lat Pulldown','Life Fitness Seated Row','Life Fitness Chest Press',
+      'Life Fitness Shoulder Press','Life Fitness Bicep Curl','Life Fitness Tricep Extension',
+      'Life Fitness Leg Press','Life Fitness Leg Extension','Life Fitness Leg Curl',
+      'Life Fitness Calf Raise','Life Fitness Hip Abductor','Life Fitness Hip Adductor',
+      'Life Fitness Cable Crossover','Life Fitness Assisted Chin/Dip',
+    ]
+  },
+  'Hammer Strength': {
+    machines: [
+      'Hammer Strength Lat Pulldown','Hammer Strength Seated Row','Hammer Strength Chest Press',
+      'Hammer Strength Incline Press','Hammer Strength Shoulder Press',
+      'Hammer Strength Leg Press','Hammer Strength Leg Curl','Hammer Strength Leg Extension',
+      'Hammer Strength Hip Extension','Hammer Strength Calf',
+    ]
+  },
+  'Technogym': {
+    machines: [
+      'Technogym Lat Machine','Technogym Low Row','Technogym Chest Press',
+      'Technogym Shoulder Press','Technogym Leg Press','Technogym Leg Extension',
+      'Technogym Leg Curl','Technogym Calf Raise','Technogym Cable Station',
+    ]
+  },
+  'Matrix': {
+    machines: [
+      'Matrix Lat Pulldown','Matrix Seated Row','Matrix Chest Press',
+      'Matrix Shoulder Press','Matrix Leg Press','Matrix Leg Extension',
+      'Matrix Leg Curl','Matrix Calf Raise','Matrix Cable Crossover',
+    ]
+  },
+  'Cybex': {
+    machines: [
+      'Cybex Lat Pulldown','Cybex Seated Row','Cybex Chest Press',
+      'Cybex Shoulder Press','Cybex Leg Press','Cybex Leg Extension',
+      'Cybex Leg Curl','Cybex Arc Trainer',
+    ]
+  },
+  'Free / Dumbbells': {
+    machines: [
+      'Dumbbell Bench Press','Leg Extension','Leg Curl','Prone Leg Curl',
+      'Inner Thigh','Outer Thigh','Decline Sit-up','Cable Machine',
+      'Barbell Rack','Smith Machine','Bench Press','Squat Rack',
+    ]
+  },
+};
+
+// Map brand machine names to EX_LIBRARY equivalents where possible
+const BRAND_TO_LIBRARY = {
+  'Life Fitness Lat Pulldown':       {type:'upper',group:'pull'},
+  'Life Fitness Seated Row':         {type:'upper',group:'pull'},
+  'Life Fitness Chest Press':        {type:'upper',group:'push'},
+  'Life Fitness Shoulder Press':     {type:'upper',group:'shoulder'},
+  'Life Fitness Bicep Curl':         {type:'upper',group:'arms'},
+  'Life Fitness Tricep Extension':   {type:'upper',group:'arms'},
+  'Life Fitness Leg Press':          {type:'legs',group:'quad'},
+  'Life Fitness Leg Extension':      {type:'legs',group:'quad'},
+  'Life Fitness Leg Curl':           {type:'legs',group:'ham'},
+  'Life Fitness Calf Raise':         {type:'legs',group:'calf'},
+  'Life Fitness Hip Abductor':       {type:'legs',group:'abductor'},
+  'Life Fitness Hip Adductor':       {type:'legs',group:'adductor'},
+  'Life Fitness Cable Crossover':    {type:'upper',group:'pull'},
+  'Life Fitness Assisted Chin/Dip':  {type:'upper',group:'pull'},
+  'Hammer Strength Lat Pulldown':    {type:'upper',group:'pull'},
+  'Hammer Strength Seated Row':      {type:'upper',group:'pull'},
+  'Hammer Strength Chest Press':     {type:'upper',group:'push'},
+  'Hammer Strength Incline Press':   {type:'upper',group:'push'},
+  'Hammer Strength Shoulder Press':  {type:'upper',group:'shoulder'},
+  'Hammer Strength Leg Press':       {type:'legs',group:'quad'},
+  'Hammer Strength Leg Curl':        {type:'legs',group:'ham'},
+  'Hammer Strength Leg Extension':   {type:'legs',group:'quad'},
+  'Hammer Strength Hip Extension':   {type:'legs',group:'glute'},
+  'Hammer Strength Calf':            {type:'legs',group:'calf'},
+  'Technogym Lat Machine':           {type:'upper',group:'pull'},
+  'Technogym Low Row':               {type:'upper',group:'pull'},
+  'Technogym Chest Press':           {type:'upper',group:'push'},
+  'Technogym Shoulder Press':        {type:'upper',group:'shoulder'},
+  'Technogym Leg Press':             {type:'legs',group:'quad'},
+  'Technogym Leg Extension':         {type:'legs',group:'quad'},
+  'Technogym Leg Curl':              {type:'legs',group:'ham'},
+  'Technogym Calf Raise':            {type:'legs',group:'calf'},
+  'Technogym Cable Station':         {type:'upper',group:'pull'},
+  'Matrix Lat Pulldown':             {type:'upper',group:'pull'},
+  'Matrix Seated Row':               {type:'upper',group:'pull'},
+  'Matrix Chest Press':              {type:'upper',group:'push'},
+  'Matrix Shoulder Press':           {type:'upper',group:'shoulder'},
+  'Matrix Leg Press':                {type:'legs',group:'quad'},
+  'Matrix Leg Extension':            {type:'legs',group:'quad'},
+  'Matrix Leg Curl':                 {type:'legs',group:'ham'},
+  'Matrix Calf Raise':               {type:'legs',group:'calf'},
+  'Matrix Cable Crossover':          {type:'upper',group:'pull'},
+  'Cybex Lat Pulldown':              {type:'upper',group:'pull'},
+  'Cybex Seated Row':                {type:'upper',group:'pull'},
+  'Cybex Chest Press':               {type:'upper',group:'push'},
+  'Cybex Shoulder Press':            {type:'upper',group:'shoulder'},
+  'Cybex Leg Press':                 {type:'legs',group:'quad'},
+  'Cybex Leg Extension':             {type:'legs',group:'quad'},
+  'Cybex Leg Curl':                  {type:'legs',group:'ham'},
+  'Cybex Arc Trainer':               {type:'legs',group:'quad'},
+  'Cable Machine':                   {type:'upper',group:'pull'},
+  'Barbell Rack':                    {type:'upper',group:'push'},
+  'Smith Machine':                   {type:'upper',group:'push'},
+  'Bench Press':                     {type:'upper',group:'push'},
+  'Squat Rack':                      {type:'legs',group:'quad'},
+};
+
+// ─── AI API CALLS ─────────────────────────────────────────────────────────────
+const AI_ENDPOINT = '/api/ai';
+
+async function callAI(payload) {
+  const res = await fetch(AI_ENDPOINT, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(payload)
+  });
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  return res.json();
+}
+
+async function runAIVision(imageBase64, mimeType) {
+  return callAI({action:'vision', imageBase64, mimeType});
+}
+
+async function runAICoach() {
+  const u = S.user();
+  const logs = S.logs();
+  const workouts = S.workouts();
+  const settings = S.settings();
+  return callAI({action:'coach', profile:u, logs, workouts, settings});
+}
 function nextValidWeight(exName, currentLb, dir) {
   const ms = MACHINE_STEPS[exName];
   if(!ms||ms.unit==='corpo'||ms.unit==='level') return currentLb;
@@ -1486,54 +1686,88 @@ window.obNext3 = function(){if(!OB.selectedDays||OB.selectedDays.length<1)return
 
 function obStep4gym() {
   const t=T();
+  const allBrands = Object.keys(BRAND_CATALOG);
+  if(!OB.selectedBrands) OB.selectedBrands = ['Genesis (Freemotion)','Precor','Free / Dumbbells'];
+  if(!OB.selectedEquip) OB.selectedEquip = Object.keys(EX_LIBRARY);
+
   return `<div class="ob-step fade-in pt-safe">
     ${obProgress(4)}
-    <div style="margin-bottom:28px;">
+    <div style="margin-bottom:24px;">
       <p style="font-size:13px;color:var(--text3);font-weight:500;margin-bottom:8px;">${t.step} 4 ${t.of} 6</p>
       <h1 style="font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-bottom:10px;">${t.gym}</h1>
       <p style="color:var(--text2);font-size:15px;line-height:1.6;">${t.gymDesc}</p>
     </div>
-    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:28px;">
-      <div style="padding:16px;border-radius:14px;border:1.5px solid var(--border);background:var(--surface);opacity:.55;position:relative;">
-        <div style="display:flex;align-items:center;gap:12px;">
-          <div><p style="font-size:15px;font-weight:700;">${t.photoOption}</p><p style="color:var(--text3);font-size:12px;margin-top:2px;">${t.photoDesc}</p></div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+
+      <!-- AI VISION — now active -->
+      <button onclick="OB.gymMode='photo';document.querySelectorAll('.gym-opt').forEach(b=>b.classList.remove('on'));this.classList.add('on');document.getElementById('photo-picker').style.display='block';document.getElementById('brand-picker').style.display='none';document.getElementById('manual-picker').style.display='none';"
+        class="sel-opt gym-opt ${OB.gymMode==='photo'?'on':''}" style="text-align:left;padding:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <p style="font-size:15px;font-weight:700;color:var(--text);">${t.aiVision}</p>
+            <p style="color:var(--text3);font-size:12px;margin-top:2px;">${t.aiVisionDesc}</p>
+          </div>
+          <span style="font-size:10px;font-weight:700;color:var(--lime);background:var(--lime-dim);border:1px solid var(--lime-border);border-radius:6px;padding:3px 8px;white-space:nowrap;margin-left:10px;">AI</span>
         </div>
-        <div style="position:absolute;top:10px;right:12px;background:var(--surface2);border-radius:20px;padding:3px 8px;"><span style="font-size:10px;font-weight:600;color:var(--text3);">${t.comingSoon}</span></div>
-      </div>
-      <button onclick="OB.gymMode='default';document.querySelectorAll('.gym-opt').forEach(b=>b.classList.remove('on'));this.classList.add('on');"
+      </button>
+
+      <button onclick="OB.gymMode='default';document.querySelectorAll('.gym-opt').forEach(b=>b.classList.remove('on'));this.classList.add('on');document.getElementById('photo-picker').style.display='none';document.getElementById('brand-picker').style.display='none';document.getElementById('manual-picker').style.display='none';"
         class="sel-opt gym-opt ${!OB.gymMode||OB.gymMode==='default'?'on':''}" style="text-align:left;padding:16px;">
         <p style="font-size:15px;font-weight:700;color:var(--text);">${t.defaultOption}</p>
         <p style="color:var(--text3);font-size:12px;margin-top:2px;">${t.defaultDesc}</p>
       </button>
-      <button onclick="OB.gymMode='manual';document.querySelectorAll('.gym-opt').forEach(b=>b.classList.remove('on'));this.classList.add('on');document.getElementById('manual-picker').style.display='block';document.getElementById('brand-picker').style.display='none';"
-        class="sel-opt gym-opt ${OB.gymMode==='manual'?'on':''}" style="text-align:left;padding:16px;">
-        <p style="font-size:15px;font-weight:700;color:var(--text);">${t.manualOption}</p>
-        <p style="color:var(--text3);font-size:12px;margin-top:2px;">${t.manualDesc}</p>
-      </button>
-      <button onclick="OB.gymMode='brand';document.querySelectorAll('.gym-opt').forEach(b=>b.classList.remove('on'));this.classList.add('on');document.getElementById('brand-picker').style.display='block';document.getElementById('manual-picker').style.display='none';"
+
+      <button onclick="OB.gymMode='brand';document.querySelectorAll('.gym-opt').forEach(b=>b.classList.remove('on'));this.classList.add('on');document.getElementById('brand-picker').style.display='block';document.getElementById('photo-picker').style.display='none';document.getElementById('manual-picker').style.display='none';"
         class="sel-opt gym-opt ${OB.gymMode==='brand'?'on':''}" style="text-align:left;padding:16px;">
         <p style="font-size:15px;font-weight:700;color:var(--text);">${t.brandOption}</p>
         <p style="color:var(--text3);font-size:12px;margin-top:2px;">${t.brandDesc}</p>
       </button>
+
+      <button onclick="OB.gymMode='manual';document.querySelectorAll('.gym-opt').forEach(b=>b.classList.remove('on'));this.classList.add('on');document.getElementById('manual-picker').style.display='block';document.getElementById('photo-picker').style.display='none';document.getElementById('brand-picker').style.display='none';"
+        class="sel-opt gym-opt ${OB.gymMode==='manual'?'on':''}" style="text-align:left;padding:16px;">
+        <p style="font-size:15px;font-weight:700;color:var(--text);">${t.manualOption}</p>
+        <p style="color:var(--text3);font-size:12px;margin-top:2px;">${t.manualDesc}</p>
+      </button>
     </div>
 
+    <!-- PHOTO PICKER -->
+    <div id="photo-picker" style="display:${OB.gymMode==='photo'?'block':'none'};margin-bottom:20px;">
+      <div id="vision-status" style="margin-bottom:12px;">
+        ${OB.visionMachines?.length ? `
+          <div style="background:var(--lime-dim);border:1px solid var(--lime-border);border-radius:10px;padding:12px 14px;margin-bottom:10px;">
+            <p style="font-size:13px;font-weight:700;color:var(--lime);margin-bottom:6px;">${t.aiVisionDone} — ${OB.visionMachines.length} machines</p>
+            <p style="font-size:12px;color:var(--lime);">${OB.visionMachines.slice(0,5).join(', ')}${OB.visionMachines.length>5?'...':''}</p>
+          </div>` : ''}
+      </div>
+      <label style="display:block;width:100%;padding:16px;background:var(--surface2);border:1.5px dashed var(--border-strong);border-radius:12px;cursor:pointer;text-align:center;">
+        <input type="file" accept="image/*" capture="environment" onchange="handleVisionPhoto(this)" style="display:none;"/>
+        <p style="font-size:14px;font-weight:600;color:var(--text2);">${t.aiVisionBtn}</p>
+        <p style="font-size:12px;color:var(--text3);margin-top:4px;">JPG, PNG — max 5MB</p>
+      </label>
+    </div>
+
+    <!-- BRAND PICKER -->
     <div id="brand-picker" style="display:${OB.gymMode==='brand'?'block':'none'};margin-bottom:20px;">
       <p style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:10px;">${t.selectBrand}</p>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
-        ${['Genesis','Precor','Free'].map(brand=>`
-          <button onclick="toggleBrand('${brand}')" id="brand_${brand}"
-            style="padding:10px 16px;border-radius:10px;border:1.5px solid ${(OB.selectedBrands||['Genesis','Precor','Free']).includes(brand)?'var(--lime-border)':'var(--border)'};background:${(OB.selectedBrands||['Genesis','Precor','Free']).includes(brand)?'var(--lime-dim)':'var(--surface)'};color:${(OB.selectedBrands||['Genesis','Precor','Free']).includes(brand)?'var(--lime)':'var(--text)'};font-size:14px;font-weight:600;cursor:pointer;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+        ${allBrands.map(brand=>`
+          <button onclick="toggleBrand('${brand.replace(/'/g,"\\'")}',this)"
+            style="padding:8px 14px;border-radius:8px;border:1.5px solid ${OB.selectedBrands.includes(brand)?'var(--lime-border)':'var(--border)'};background:${OB.selectedBrands.includes(brand)?'var(--lime-dim)':'var(--surface)'};color:${OB.selectedBrands.includes(brand)?'var(--lime)':'var(--text2)'};font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;">
             ${brand}
           </button>`).join('')}
       </div>
+      <div id="brand-equip-list" style="display:flex;flex-direction:column;gap:6px;">
+        ${renderBrandEquipList()}
+      </div>
     </div>
 
+    <!-- MANUAL PICKER -->
     <div id="manual-picker" style="display:${OB.gymMode==='manual'?'block':'none'};margin-bottom:20px;">
       <p style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:10px;">${t.selectEquip}</p>
       <div style="display:flex;flex-direction:column;gap:6px;">
         ${Object.keys(EX_LIBRARY).map(name=>`
           <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border-radius:10px;border:1.5px solid var(--border);cursor:pointer;">
-            <input type="checkbox" value="${name}" ${(OB.selectedEquip||Object.keys(EX_LIBRARY)).includes(name)?'checked':''} onchange="toggleEquip('${name}')"
+            <input type="checkbox" value="${name}" ${OB.selectedEquip.includes(name)?'checked':''} onchange="toggleEquip('${name.replace(/'/g,"\\'")}',this)"
               style="width:18px;height:18px;accent-color:var(--lime);cursor:pointer;flex-shrink:0;"/>
             <span style="font-size:13px;font-weight:500;">${name}</span>
             <span style="margin-left:auto;font-size:11px;color:var(--text3);">${TYPE_LABEL[EX_LIBRARY[name].type]||''}</span>
@@ -1547,18 +1781,34 @@ function obStep4gym() {
     </div>
   </div>`;
 }
-window.toggleBrand = function(brand) {
-  if(!OB.selectedBrands) OB.selectedBrands=['Genesis','Precor','Free'];
+
+function renderBrandEquipList() {
+  if(!OB.selectedBrands||!OB.selectedBrands.length) return '<p style="font-size:13px;color:var(--text3);">Select brands above</p>';
+  const machines = OB.selectedBrands.flatMap(b=>BRAND_CATALOG[b]?.machines||[]);
+  if(!OB.selectedEquip) OB.selectedEquip = [...machines];
+  return machines.map(name=>`
+    <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border-radius:10px;border:1.5px solid var(--border);cursor:pointer;">
+      <input type="checkbox" value="${name}" ${OB.selectedEquip.includes(name)?'checked':''} onchange="toggleEquip('${name.replace(/'/g,"\\'")}',this)"
+        style="width:18px;height:18px;accent-color:var(--lime);cursor:pointer;flex-shrink:0;"/>
+      <span style="font-size:13px;font-weight:500;">${name}</span>
+      <span style="margin-left:auto;font-size:11px;color:var(--text3);">${TYPE_LABEL[(EX_LIBRARY[name]||BRAND_TO_LIBRARY[name])?.type]||''}</span>
+    </label>`).join('');
+}
+
+window.toggleBrand = function(brand, btn) {
+  if(!OB.selectedBrands) OB.selectedBrands=[];
   const idx=OB.selectedBrands.indexOf(brand);
   if(idx>=0) OB.selectedBrands.splice(idx,1);
   else OB.selectedBrands.push(brand);
-  const btn=$('brand_'+brand);
+  const on=OB.selectedBrands.includes(brand);
   if(btn){
-    const on=OB.selectedBrands.includes(brand);
     btn.style.borderColor=on?'var(--lime-border)':'var(--border)';
     btn.style.background=on?'var(--lime-dim)':'var(--surface)';
-    btn.style.color=on?'var(--lime)':'var(--text)';
+    btn.style.color=on?'var(--lime)':'var(--text2)';
   }
+  // Refresh equip list
+  const el=document.getElementById('brand-equip-list');
+  if(el) el.innerHTML=renderBrandEquipList();
 };
 window.toggleEquip = function(name) {
   if(!OB.selectedEquip) OB.selectedEquip=Object.keys(EX_LIBRARY);
@@ -1566,6 +1816,41 @@ window.toggleEquip = function(name) {
   if(idx>=0) OB.selectedEquip.splice(idx,1);
   else OB.selectedEquip.push(name);
 };
+
+window.handleVisionPhoto = async function(input) {
+  const t=T();
+  const file = input.files?.[0];
+  if(!file) return;
+  const statusEl = document.getElementById('vision-status');
+  if(statusEl) statusEl.innerHTML=`<div style="padding:12px 14px;background:var(--surface2);border-radius:10px;"><p style="font-size:13px;color:var(--text2);">${t.aiVisionRunning}</p></div>`;
+
+  try {
+    const base64 = await fileToBase64(file);
+    const result = await runAIVision(base64, file.type);
+    const machines = result.machines || [];
+    OB.visionMachines = machines;
+    OB.selectedEquip = machines;
+    if(statusEl) statusEl.innerHTML=`
+      <div style="background:var(--lime-dim);border:1px solid var(--lime-border);border-radius:10px;padding:12px 14px;margin-bottom:10px;">
+        <p style="font-size:13px;font-weight:700;color:var(--lime);margin-bottom:6px;">${t.aiVisionDone} — ${machines.length} machines</p>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          ${machines.map(m=>`<p style="font-size:12px;color:var(--lime);">· ${m}</p>`).join('')}
+        </div>
+      </div>`;
+  } catch(e) {
+    if(statusEl) statusEl.innerHTML=`<div style="padding:12px 14px;background:var(--red-dim);border-radius:10px;"><p style="font-size:13px;color:var(--red);">${t.aiVisionError}</p></div>`;
+  }
+};
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 window.obNext4gym = function(){if(!OB.gymMode)OB.gymMode='default';renderOnboarding(5);};
 
 function obStep5weights() {
@@ -2618,6 +2903,23 @@ window.renderProfile = function() {
       </div>
     </div>
 
+    <!-- AI COACH CARD -->
+    <div class="card" style="margin-bottom:12px;">
+      <div style="padding:16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <p style="font-size:15px;font-weight:700;">${t.aiCoach}</p>
+          <p style="font-size:12px;color:var(--text3);margin-top:2px;">${t.aiCoachDesc}</p>
+        </div>
+        <button onclick="runAICoachUI()" style="padding:8px 16px;background:var(--lime);border:none;border-radius:8px;color:#0c0c0e;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;">${t.aiCoachRun}</button>
+      </div>
+      <div id="ai-coach-result" style="padding:0;"></div>
+    </div>
+
+    <!-- TIPS & TRICKS -->
+    <div class="card-sm" style="margin-bottom:12px;">
+      <button onclick="showTips()" style="width:100%;padding:4px 0;background:transparent;border:none;color:var(--text2);font-size:14px;font-weight:600;cursor:pointer;text-align:left;">${t.tipsTitle}</button>
+    </div>
+
     <div class="card-sm" style="margin-bottom:10px;">
       <button onclick="resetWk()" style="width:100%;padding:10px;background:transparent;border:none;color:var(--amber);font-size:14px;font-weight:600;cursor:pointer;text-align:left;">${t.resetWeights}</button>
     </div>
@@ -2639,6 +2941,111 @@ window.saveProfile = function() {
   S.set('ga_user',u);
   S.set('ga_unit',$('p_unit').value);
   renderProfile();
+};
+
+window.runAICoachUI = async function() {
+  const t=T();
+  const resultEl = document.getElementById('ai-coach-result');
+  if(!resultEl) return;
+  resultEl.innerHTML=`<div style="padding:14px 16px;"><p style="font-size:13px;color:var(--text2);">${t.aiCoachRunning}</p></div>`;
+  try {
+    const result = await runAICoach();
+    const adj = result.adjustments || [];
+    const increases = adj.filter(a=>a.action==='increase');
+    const decreases = adj.filter(a=>a.action==='decrease');
+    const holds = adj.filter(a=>a.action==='hold');
+
+    resultEl.innerHTML=`<div style="padding:14px 16px;">
+      ${result.generalAdvice?`<p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:14px;">${result.generalAdvice}</p>`:''}
+      ${result.focusArea?`<p style="font-size:11px;font-weight:700;color:var(--lime);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;">Focus: ${result.focusArea}</p>`:''}
+      ${adj.length===0?`<p style="font-size:13px;color:var(--text3);">No adjustments needed. Keep training.</p>`:`
+        <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;">
+          ${adj.map(a=>`
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface2);border-radius:8px;gap:10px;">
+              <div style="flex:1;min-width:0;">
+                <p style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.exercise}</p>
+                <p style="font-size:11px;color:var(--text3);margin-top:2px;">${a.reason}</p>
+              </div>
+              <div style="text-align:right;flex-shrink:0;">
+                <p style="font-size:13px;font-weight:700;color:${a.action==='increase'?'var(--lime)':a.action==='decrease'?'var(--red)':'var(--text3)'};">
+                  ${a.action==='increase'?'+':a.action==='decrease'?'−':'='} ${dispW(Math.abs(a.suggestedWeight-a.currentWeight))} lb
+                </p>
+                <p style="font-size:11px;color:var(--text3);">${dispW(a.currentWeight)} → ${dispW(a.suggestedWeight)}</p>
+              </div>
+            </div>`).join('')}
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="applyAICoach(${JSON.stringify(adj).replace(/"/g,'&quot;')})" style="flex:1;padding:12px;background:var(--lime);border:none;border-radius:10px;color:#0c0c0e;font-size:13px;font-weight:700;cursor:pointer;">${t.aiCoachApply}</button>
+          <button onclick="document.getElementById('ai-coach-result').innerHTML=''" style="flex:1;padding:12px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;">${t.aiCoachSkip}</button>
+        </div>`}
+    </div>`;
+  } catch(e) {
+    resultEl.innerHTML=`<div style="padding:14px 16px;"><p style="font-size:13px;color:var(--red);">${T().aiCoachError}</p></div>`;
+  }
+};
+
+window.applyAICoach = function(adjustments) {
+  const wk = S.workouts();
+  if(!wk) return;
+  adjustments.forEach(a => {
+    if(a.action === 'hold') return;
+    Object.keys(wk).forEach(key => {
+      const ex = wk[key].find(e=>e.name===a.exercise);
+      if(ex && ex.unit!=='corpo' && ex.unit!=='level') {
+        ex.weight = a.suggestedWeight;
+      }
+    });
+  });
+  S.saveWorkouts(wk);
+  // Log the AI adjustment
+  const cfg = S.settings();
+  cfg.lastAutoWeights = new Date().toISOString();
+  S.saveSettings(cfg);
+  document.getElementById('ai-coach-result').innerHTML=`<div style="padding:14px 16px;"><p style="font-size:13px;color:var(--lime);font-weight:600;">Weights updated.</p></div>`;
+};
+
+window.showTips = function() {
+  const t=T();
+  const lang=S.lang()||'pt';
+  const tips = {
+    pt:[
+      {title:'Pesos automaticos vs manual',body:'Auto (14 dias): o app analisa seu historico e ajusta sozinho. Manual (7 dias): um botao aparece na aba Pesos quando estiver na hora. Se nao apertar, nada muda.'},
+      {title:'Como usar comentarios',body:'Ao finalizar o treino, escreva como foi. Exemplos: "Senti dor no ombro", "Muito cansado hoje", "Otimo treino". O AI Coach usa esses comentarios para ajustar seus pesos com mais precisao.'},
+      {title:'Bluetooth',body:'Se voce tem o sensor GymApp (ESP32), conecte em Perfil > Dispositivos Bluetooth. Durante o treino, o contador automatico usa o sensor para contar reps sem precisar segurar o celular.'},
+      {title:'Adicionar ou remover maquinas',body:'Durante o treino, toque nos tres pontos (...) no topo para adicionar ou remover exercicios. Voce tambem pode pular qualquer exercicio sem perder o treino.'},
+      {title:'AI Coach',body:'Em Perfil > AI Coach, o sistema analisa seu historico dos ultimos 30 dias e sugere ajustes de peso. Voce pode aplicar ou ignorar as sugestoes.'},
+    ],
+    en:[
+      {title:'Auto vs manual weights',body:'Auto (14 days): the app analyzes your history and adjusts automatically. Manual (7 days): a button appears in the Weights tab when it\'s time. If you don\'t tap it, nothing changes.'},
+      {title:'How to use comments',body:'After finishing a workout, write how it went. Examples: "Felt shoulder pain", "Very tired today", "Great session". The AI Coach uses these comments to adjust your weights more accurately.'},
+      {title:'Bluetooth',body:'If you have the GymApp sensor (ESP32), connect it in Profile > Bluetooth Devices. During workout, the auto counter uses the sensor to count reps without holding your phone.'},
+      {title:'Add or remove machines',body:'During workout, tap the three dots (...) at the top to add or remove exercises. You can also skip any exercise without losing your workout.'},
+      {title:'AI Coach',body:'In Profile > AI Coach, the system analyzes your last 30 days and suggests weight adjustments. You can apply or ignore the suggestions.'},
+    ],
+    es:[
+      {title:'Pesos automaticos vs manual',body:'Auto (14 dias): la app analiza tu historial y ajusta sola. Manual (7 dias): aparece un boton en la pestana Pesos cuando sea el momento. Si no lo tocas, nada cambia.'},
+      {title:'Como usar comentarios',body:'Al finalizar el entrenamiento, escribe como fue. Ejemplos: "Senti dolor en el hombro", "Muy cansado hoy", "Excelente sesion". El AI Coach usa estos comentarios para ajustar tus pesos con mas precision.'},
+      {title:'Bluetooth',body:'Si tienes el sensor GymApp (ESP32), conectalo en Perfil > Dispositivos Bluetooth. Durante el entrenamiento, el contador automatico usa el sensor para contar reps sin sostener el telefono.'},
+      {title:'Agregar o quitar maquinas',body:'Durante el entrenamiento, toca los tres puntos (...) arriba para agregar o quitar ejercicios. Tambien puedes saltar cualquier ejercicio sin perder el entrenamiento.'},
+      {title:'AI Coach',body:'En Perfil > AI Coach, el sistema analiza tus ultimos 30 dias y sugiere ajustes de peso. Puedes aplicar o ignorar las sugerencias.'},
+    ],
+  };
+  const items = tips[lang]||tips.pt;
+  const ov=document.createElement('div');ov.className='overlay fade-in';ov.id='tips-ov';
+  ov.innerHTML=`<div class="sheet" style="max-height:88vh;overflow-y:auto;">
+    <div class="sheet-handle"></div>
+    <p style="font-size:20px;font-weight:800;margin-bottom:20px;">${t.tipsTitle}</p>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
+      ${items.map((item,i)=>`
+        <div style="padding:14px 16px;background:var(--surface2);border-radius:12px;border:1px solid var(--border);">
+          <p style="font-size:14px;font-weight:700;margin-bottom:6px;">${item.title}</p>
+          <p style="font-size:13px;color:var(--text2);line-height:1.65;">${item.body}</p>
+        </div>`).join('')}
+    </div>
+    <button class="btn btn-ghost" onclick="document.getElementById('tips-ov').remove()">${t.tipsClose}</button>
+  </div>`;
+  ov.onclick=e=>{if(e.target===ov)ov.remove();};
+  document.body.appendChild(ov);
 };
 
 function renderBleDevices(t) {

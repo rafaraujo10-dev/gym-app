@@ -11,6 +11,116 @@
 
 ## Stack
 - **Frontend:** HTML + CSS + JS vanilla — **TUDO em um único arquivo: `public/index.html`**
+- **Backend:** Cloudflare Pages Functions — `functions/api/ai.js` (proxy OpenAI)
+- **Deploy:** Cloudflare Pages (não Workers)
+- **Repo:** `rafaraujo10-dev/gym-app`
+- **URL live:** `https://gym-app-8ea.pages.dev/`
+- **Deploy:** `git push` → Cloudflare atualiza em ~1 min
+- **Sem framework, sem build step**
+- **Secret:** `OPENAI_API_KEY` configurado no Cloudflare Dashboard → Pages → Settings → Environment Variables
+
+## Estrutura
+```
+gym-app/
+├── public/
+│   ├── index.html   ← TODO o app está aqui (~2500+ linhas)
+│   └── manifest.json
+├── functions/
+│   └── api/
+│       └── ai.js    ← Cloudflare Pages Function (proxy OpenAI)
+├── wrangler.toml
+└── package.json
+```
+
+---
+
+## Estado atual do app (Sprint 2 completo)
+
+### Funcionalidades implementadas
+
+**Onboarding (6 passos + tutorial)**
+0. Tutorial swipe (5 cards) — pode pular
+1. Nome + altura + peso (lb/kg) + idade + sexo + unidade + idioma — dados preservados ao mudar idioma
+2. Nível + Objetivo + Foco + **Tempo de sessão (30/45/60/75 min → calcula nº de máquinas)**
+3. Agenda — dias da semana
+4. Academia — **AI Vision (foto → identifica máquinas)** + por marca (Genesis, Precor, Life Fitness, Hammer Strength, Technogym, Matrix, Cybex, Free) + manual + padrão
+5. Preview dos pesos estimados — **editáveis inline**
+6. Confirmação → Disclaimer (toggles auto-pesos, BLE, nº séries) → Dashboard
+
+**Dashboard (aba Inicio)**
+- Card do treino de hoje → Summary (pesos editáveis com +/−) → inicia treino
+- Retoma sessão salva se houver treino em andamento
+
+**Tela de Treino**
+- Sessão salva em memória (ga_active_session) — não perde ao voltar
+- 4 botões de navegação: Back (nome do exercício), Skip (nome do próximo), All exercises, End workout
+- Botão "⋯" → Add exercise / Remove exercise
+- Pesos com incrementos válidos por máquina (MACHINE_STEPS)
+- Comentário pós-treino salvo no log
+- Finish Anyway funciona — exercícios pulados marcados como skipped, excluídos da progressão
+
+**Aba Pesos**
+- Banner de revisão manual quando disponível (a cada 7 dias)
+- Pesos editáveis com sequências válidas por máquina
+
+**Perfil**
+- **AI Coach** — analisa últimos 30 dias + comentários → sugere ajustes de peso
+- **Tips & Tricks** — guia de uso do app
+- Bluetooth: Connect + Test separados
+- Auto-ajuste: Auto (14 dias) ou Manual (7 dias)
+
+**AI (via Cloudflare Pages Function /api/ai)**
+- `action: 'vision'` — foto → OpenAI GPT-4o-mini Vision → lista de máquinas
+- `action: 'coach'` — histórico + comentários → OpenAI → sugestões de peso
+
+---
+
+## localStorage keys
+```
+ga_user            → {name, height, weight, age, sex, level, focus, goal, trainDays, schedule, sessionTime, sessionMachines, onboardedAt}
+ga_logs            → [{date, workout, exercises:[{name, weight, unit, reps:[], skipped?, comment?}], comment?}]
+ga_workouts        → {A:[{name, weight, unit, type, group, caution}], ...}
+ga_streak          → number
+ga_lang            → 'pt' | 'en' | 'es'
+ga_unit            → 'lb' | 'kg'
+ga_settings        → {autoWeights, autoBle, numSets, bleArm, bleLeg, lastAutoWeights, disclaimerSeen}
+ga_active_session  → {key, cur, sessionData, ts} — treino em andamento
+```
+
+## Como fazer deploy
+```bash
+# Na pasta gym-app:
+git add .
+git commit -m "mensagem"
+git push
+# Cloudflare Pages deploya automaticamente em ~1 min
+```
+
+## Como configurar OPENAI_API_KEY
+```
+1. Cloudflare Dashboard → Pages → gym-app → Settings → Environment Variables
+2. Add variable: OPENAI_API_KEY = sk-...
+3. Aplicar em Production e Preview
+```
+
+## Próximas features (Sprint 3)
+- GIFs reais de exercícios (hospedar no R2 ou usar ExerciseDB API)
+- Foto corporal Premium (upload → AI analisa progresso)
+- Subscription + pausa (Stripe ou Cloudflare)
+- Mais exercícios no EX_LIBRARY para marcas novas (Life Fitness, etc.)
+
+
+## Quem é o usuário
+- Rafael, brasileiro, mora nos EUA
+- Duas empresas: **Atendro AI** (consultoria AI) e **nova empresa sem nome** (apps AI para consumidores)
+- GymApp é o produto principal da nova empresa
+- Modelo: hardware DIY (ESP32 + acelerômetro, ~$15 custo, vender $49) + app ($5/mês ou grátis com hardware)
+- Público-alvo: EUA + Brasil + Latam → app em PT/EN/ES
+
+---
+
+## Stack
+- **Frontend:** HTML + CSS + JS vanilla — **TUDO em um único arquivo: `public/index.html`**
 - **Deploy:** Cloudflare Pages (não Workers)
 - **Repo:** `rafaraujo10-dev/gym-app`
 - **URL live:** `https://gym-app-8ea.pages.dev/`

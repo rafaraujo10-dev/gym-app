@@ -3,3 +3,7 @@ compatibility_date = "2026-04-12"
 
 [assets]
 directory = "./public"
+
+# Pages Functions are auto-detected from /functions directory
+# Set OPENAI_API_KEY as a secret in Cloudflare dashboard:
+# wrangler pages secret put OPENAI_API_KEY

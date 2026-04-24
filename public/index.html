@@ -133,6 +133,21 @@ const LANGS = {
     numSets:'Series por exercicio',
     numSetsDesc:'Quantas series voce quer fazer em cada exercicio? (sugerido: 3)',
     reviewWeights:'Revisar pesos',
+    resumeSession:'Treino em andamento',
+    resumeSessionDesc:'Voce tem um treino salvo. Continuar de onde parou?',
+    resumeYes:'Continuar treino',
+    resumeNo:'Comecar do zero',
+    sessionTime:'Duracao do treino',
+    sessionTimeDesc:'Quanto tempo voce tem? Isso define quantas maquinas por dia.',
+    addExercise:'Adicionar exercicio',
+    removeExercise:'Remover exercicio',
+    workoutComment:'Como foi o treino?',
+    workoutCommentPlaceholder:'Ex: Senti dor no ombro, muito cansado, otimo treino...',
+    workoutCommentSkip:'Pular',
+    workoutCommentSave:'Salvar e finalizar',
+    tutorialSkip:'Pular',
+    tutorialNext:'Proximo',
+    tutorialStart:'Comecar',
     step:'PASSO',
     of:'DE',
     continue:'Continuar',
@@ -274,6 +289,21 @@ const LANGS = {
     numSets:'Sets per exercise',
     numSetsDesc:'How many sets per exercise? (suggested: 3)',
     reviewWeights:'Review weights',
+    resumeSession:'Workout in progress',
+    resumeSessionDesc:'You have a saved workout. Continue where you left off?',
+    resumeYes:'Continue workout',
+    resumeNo:'Start over',
+    sessionTime:'Workout duration',
+    sessionTimeDesc:'How much time do you have? This sets how many machines per day.',
+    addExercise:'Add exercise',
+    removeExercise:'Remove exercise',
+    workoutComment:'How was the workout?',
+    workoutCommentPlaceholder:'e.g. Felt shoulder pain, very tired, great session...',
+    workoutCommentSkip:'Skip',
+    workoutCommentSave:'Save and finish',
+    tutorialSkip:'Skip',
+    tutorialNext:'Next',
+    tutorialStart:'Get started',
     step:'STEP',
     of:'OF',
     continue:'Continue',
@@ -415,6 +445,21 @@ const LANGS = {
     numSets:'Series por ejercicio',
     numSetsDesc:'Cuantas series por ejercicio? (sugerido: 3)',
     reviewWeights:'Revisar pesos',
+    resumeSession:'Entrenamiento en curso',
+    resumeSessionDesc:'Tienes un entrenamiento guardado. Continuar donde lo dejaste?',
+    resumeYes:'Continuar entrenamiento',
+    resumeNo:'Empezar de nuevo',
+    sessionTime:'Duracion del entrenamiento',
+    sessionTimeDesc:'Cuanto tiempo tienes? Esto define cuantas maquinas por dia.',
+    addExercise:'Agregar ejercicio',
+    removeExercise:'Quitar ejercicio',
+    workoutComment:'Como fue el entrenamiento?',
+    workoutCommentPlaceholder:'Ej: Senti dolor en el hombro, muy cansado, excelente sesion...',
+    workoutCommentSkip:'Omitir',
+    workoutCommentSave:'Guardar y finalizar',
+    tutorialSkip:'Omitir',
+    tutorialNext:'Siguiente',
+    tutorialStart:'Empezar',
     step:'PASO',
     of:'DE',
     continue:'Continuar',
@@ -649,11 +694,12 @@ function estimateWeight(exName, level, bodyWeightKg) {
   return {weight: w, unit: base.unit};
 }
 
-function buildWorkouts(focus, numDays, level, bodyWeightKg) {
+function buildWorkouts(focus, numDays, level, bodyWeightKg, maxMachines) {
   const templates = WORKOUT_TEMPLATES[focus] || WORKOUT_TEMPLATES.full;
   const result = {};
+  const limit = maxMachines || 11;
   WORKOUT_KEYS.slice(0, numDays).forEach((key, i) => {
-    const exNames = templates[i % templates.length];
+    const exNames = templates[i % templates.length].slice(0, limit);
     result[key] = exNames.map(name => {
       const meta = EX_LIBRARY[name] || {type:'upper',group:'other'};
       const est = estimateWeight(name, level, bodyWeightKg);
@@ -671,6 +717,51 @@ function getScheduleMap(user) {
   days.forEach((d,i)=>{ map[d]=WORKOUT_KEYS[i]; });
   return map;
 }
+
+// ─── MACHINE WEIGHT SEQUENCES ────────────────────────────────────────────────
+// Real weight stacks per machine — only valid weights can be selected
+const MACHINE_STEPS = {
+  'Precor Pulldown 304':        {seq: seq(10,200,5),   unit:'lb'},
+  'Genesis Lat':                {seq: seq(5,200,5),    unit:'lb'},
+  'Precor Low Row':             {seq: seq(10,200,5),   unit:'lb'},
+  'Precor Seated Row':          {seq: seq(10,200,5),   unit:'lb'},
+  'Genesis Dual Cable':         {seq: seq(2.5,50,2.5), unit:'lb'},
+  'Genesis Chin / Dip Assist':  {seq: [1,2,3,4,5,6,7,8,9,10,11,12], unit:'level'},
+  'Genesis Multiplane Chest':   {seq: seq(5,150,5),    unit:'lb'},
+  'Dumbbell Bench Press':       {seq: seq(5,100,5),    unit:'lb cada'},
+  'Genesis Multiplane Shoulder':{seq: seq(5,100,5),    unit:'lb'},
+  'Genesis Biceps':             {seq: seq(5,100,5),    unit:'lb'},
+  'Genesis Biceps Preacher':    {seq: seq(5,100,5),    unit:'lb'},
+  'Genesis Triceps':            {seq: seq(5,150,5),    unit:'lb'},
+  'Genesis Triceps Seated':     {seq: seq(5,150,5),    unit:'lb'},
+  'Leg Extension':              {seq: seq(10,200,10).concat(seq(15,200,5).filter(v=>v%10!==0)), unit:'lb'},
+  'Leg Curl':                   {seq: seq(10,150,5),   unit:'lb'},
+  'Prone Leg Curl':             {seq: seq(10,150,5),   unit:'lb'},
+  'Genesis Total Quad / Hip':   {seq: seq(2.5,50,2.5), unit:'lb'},
+  'Genesis Total Glute / Ham':  {seq: seq(2.5,50,2.5), unit:'lb'},
+  'Inner Thigh':                {seq: seq(10,250,10),  unit:'lb'},
+  'Outer Thigh':                {seq: seq(10,250,10),  unit:'lb'},
+  'Genesis Multiplane Calf':    {seq: seq(20,300,10),  unit:'lb'},
+  'Decline Sit-up':             {seq: [0],             unit:'corpo'},
+};
+function seq(min,max,step){const r=[];for(let v=min;v<=max;v=Math.round((v+step)*100)/100)r.push(v);return r;}
+function nextValidWeight(exName, currentLb, dir) {
+  const ms = MACHINE_STEPS[exName];
+  if(!ms||ms.unit==='corpo'||ms.unit==='level') return currentLb;
+  const s = ms.seq;
+  // Find closest index
+  let idx = s.findIndex(v=>Math.abs(v-currentLb)<0.01);
+  if(idx<0) idx = s.reduce((bi,v,i)=>Math.abs(v-currentLb)<Math.abs(s[bi]-currentLb)?i:bi,0);
+  const newIdx = Math.max(0,Math.min(s.length-1, idx+dir));
+  return s[newIdx];
+}
+
+// ─── ACTIVE SESSION PERSISTENCE ──────────────────────────────────────────────
+function saveActiveSession(key, cur, sessionData) {
+  S.set('ga_active_session', {key, cur, sessionData, ts: Date.now()});
+}
+function clearActiveSession() { localStorage.removeItem('ga_active_session'); }
+function getActiveSession() { return S.get('ga_active_session', null); }
 
 // ─── STREAK LOGIC ────────────────────────────────────────────────────────────
 // Streak = consecutive scheduled training days completed (not calendar days)
@@ -1075,6 +1166,71 @@ window.disclaimerAccept = function(cb) {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
+// TUTORIAL (swipe cards before onboarding)
+// ═══════════════════════════════════════════════════════════════════════════
+function renderTutorial() {
+  const t = T();
+  const lang = S.lang()||'pt';
+  const slides = {
+    pt:[
+      {title:'Seus treinos,\nseu ritmo.',body:'Escolha os dias, as maquinas e o tempo disponivel. O app monta o plano ideal para voce.'},
+      {title:'Registre\ncada serie.',body:'Durante o treino, registre suas reps. Use o contador automatico via Bluetooth ou pelo celular.'},
+      {title:'Pesos que\nevoluem com voce.',body:'Automatico a cada 14 dias, ou manual quando quiser. O app analisa seu historico e ajusta.'},
+      {title:'Comente.\nO AI ouve.',body:'Sentiu dor no ombro? Muito cansado? Escreva. O AI leva seus comentarios em consideracao nos proximos ajustes.'},
+      {title:'Adicione ou\nremova maquinas.',body:'Durante o treino, voce pode adicionar ou remover exercicios. O plano e seu.'},
+    ],
+    en:[
+      {title:'Your workouts,\nyour pace.',body:'Choose your days, machines and available time. The app builds the ideal plan for you.'},
+      {title:'Log every\nset.',body:'During your workout, log your reps. Use the auto counter via Bluetooth or your phone.'},
+      {title:'Weights that\ngrow with you.',body:'Automatic every 14 days, or manual whenever you want. The app analyzes your history and adjusts.'},
+      {title:'Comment.\nThe AI listens.',body:'Felt shoulder pain? Too tired? Write it down. The AI considers your comments in future adjustments.'},
+      {title:'Add or remove\nmachines.',body:'During your workout, you can add or remove exercises. The plan is yours.'},
+    ],
+    es:[
+      {title:'Tus entrenamientos,\ntu ritmo.',body:'Elige tus dias, maquinas y tiempo disponible. La app arma el plan ideal para ti.'},
+      {title:'Registra\ncada serie.',body:'Durante el entrenamiento, registra tus reps. Usa el contador automatico via Bluetooth o tu telefono.'},
+      {title:'Pesos que\ncrecen contigo.',body:'Automatico cada 14 dias, o manual cuando quieras. La app analiza tu historial y ajusta.'},
+      {title:'Comenta.\nLa IA escucha.',body:'Sentiste dolor en el hombro? Muy cansado? Escribelo. La IA considera tus comentarios en los proximos ajustes.'},
+      {title:'Agrega o quita\nmaquinas.',body:'Durante el entrenamiento, puedes agregar o quitar ejercicios. El plan es tuyo.'},
+    ],
+  };
+  const cards = slides[lang]||slides.pt;
+  let idx = 0;
+
+  function renderSlide() {
+    const c = cards[idx];
+    const isLast = idx === cards.length-1;
+    app.innerHTML = `
+    <div class="fade-in" style="min-height:100vh;display:flex;flex-direction:column;padding:max(40px,env(safe-area-inset-top)) 28px 40px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:auto;">
+        <p style="font-size:12px;font-weight:700;color:var(--text3);letter-spacing:.1em;">GYMAPP</p>
+        <button onclick="startOnboarding()" style="background:none;border:none;color:var(--text3);font-size:13px;font-weight:600;cursor:pointer;padding:4px 0;">${t.tutorialSkip}</button>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:40px 0;">
+        <div style="width:48px;height:3px;background:var(--lime);border-radius:2px;margin-bottom:40px;"></div>
+        <h1 style="font-size:36px;font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-bottom:20px;white-space:pre-line;">${c.title}</h1>
+        <p style="font-size:16px;color:var(--text2);line-height:1.7;">${c.body}</p>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;gap:6px;">
+          ${cards.map((_,i)=>`<div style="width:${i===idx?20:6}px;height:6px;border-radius:3px;background:${i===idx?'var(--lime)':'var(--surface3)'};transition:all .3s;"></div>`).join('')}
+        </div>
+        <button onclick="tutNext()" style="padding:14px 28px;background:var(--lime);border:none;border-radius:12px;color:#0c0c0e;font-size:15px;font-weight:700;cursor:pointer;">
+          ${isLast?t.tutorialStart:t.tutorialNext+' →'}
+        </button>
+      </div>
+    </div>`;
+  }
+
+  window.tutNext = function() {
+    if(idx < cards.length-1){ idx++; renderSlide(); }
+    else startOnboarding();
+  };
+  window.startOnboarding = function() { OB={}; renderOnboarding(1); };
+  renderSlide();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // ONBOARDING
 // ═══════════════════════════════════════════════════════════════════════════
 let OB = {};
@@ -1235,6 +1391,26 @@ function obStep2() {
           </button>`).join('')}
       </div>
     </div>
+    <div style="margin-bottom:22px;">
+      <label style="display:block;color:var(--text2);font-size:13px;font-weight:500;margin-bottom:6px;">${t.sessionTime}</label>
+      <p style="font-size:12px;color:var(--text3);margin-bottom:12px;">${t.sessionTimeDesc}</p>
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        ${[[30,'30 min'],[45,'45 min'],[60,'60 min'],[75,'75 min']].map(([v,l])=>`
+          <button onclick="OB.sessionMins=${v};OB.sessionMachines=Math.floor(${v}/5);document.querySelectorAll('.st-btn').forEach(b=>b.classList.remove('on'));this.classList.add('on');updateSessionMachines();"
+            class="sel-opt st-btn ${(OB.sessionMins||45)===v?'on':''}" style="flex:1;padding:12px 4px;text-align:center;">
+            <p style="font-size:13px;font-weight:700;color:var(--text);">${l}</p>
+            <p style="font-size:11px;color:var(--text3);margin-top:2px;">~${Math.floor(v/5)} ex.</p>
+          </button>`).join('')}
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border-radius:10px;padding:12px 16px;">
+        <p style="font-size:13px;color:var(--text2);">Exercises per day</p>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button onclick="bumpSessionMachines(-1)" style="width:28px;height:28px;border-radius:6px;background:var(--bg);border:1px solid var(--border);color:var(--text);font-size:16px;font-weight:700;cursor:pointer;">−</button>
+          <span id="sm-val" style="font-size:18px;font-weight:800;color:var(--lime);min-width:24px;text-align:center;">${OB.sessionMachines||Math.floor((OB.sessionMins||45)/5)}</span>
+          <button onclick="bumpSessionMachines(1)" style="width:28px;height:28px;border-radius:6px;background:var(--bg);border:1px solid var(--border);color:var(--text);font-size:16px;font-weight:700;cursor:pointer;">+</button>
+        </div>
+      </div>
+    </div>
     <div style="display:flex;gap:10px;">
       <button class="btn btn-ghost" style="flex:.4;" onclick="renderOnboarding(1)">&larr; ${t.back}</button>
       <button class="btn btn-primary" style="flex:1;" onclick="obNext2()">${t.continue} &rarr;</button>
@@ -1246,7 +1422,18 @@ window.obNext2 = function() {
   if(!OB.level){alert(t.level+' ?');return;}
   if(!OB.goal){alert(t.goal+' ?');return;}
   if(!OB.focus){alert(t.focus+' ?');return;}
+  if(!OB.sessionMins) OB.sessionMins=45;
+  if(!OB.sessionMachines) OB.sessionMachines=Math.floor(OB.sessionMins/5);
   renderOnboarding(3);
+};
+window.updateSessionMachines = function() {
+  const el=document.getElementById('sm-val');
+  if(el) el.textContent=OB.sessionMachines||Math.floor((OB.sessionMins||45)/5);
+};
+window.bumpSessionMachines = function(d) {
+  OB.sessionMachines=Math.max(4,Math.min(15,(OB.sessionMachines||Math.floor((OB.sessionMins||45)/5))+d));
+  const el=document.getElementById('sm-val');
+  if(el) el.textContent=OB.sessionMachines;
 };
 
 function obStep3() {
@@ -1504,8 +1691,9 @@ window.obFinish = function() {
   const numDays=OB.selectedDays.length;
   const schedule={};
   OB.selectedDays.forEach((d,i)=>{schedule[d]=WORKOUT_KEYS[i];});
-  const workouts=OB._previewWorkouts||buildWorkouts(OB.focus||'full',numDays,OB.level||'int',OB.weight||80);
-  S.set('ga_user',{name:OB.name,height:OB.height,weight:OB.weight,age:OB.age,sex:OB.sex,level:OB.level,focus:OB.focus,goal:OB.goal||'grow',trainDays:numDays,schedule,sessionTime:'45',onboardedAt:new Date().toISOString()});
+  const machines=OB.sessionMachines||Math.floor((OB.sessionMins||45)/5);
+  const workouts=OB._previewWorkouts||buildWorkouts(OB.focus||'full',numDays,OB.level||'int',OB.weight||80,machines);
+  S.set('ga_user',{name:OB.name,height:OB.height,weight:OB.weight,age:OB.age,sex:OB.sex,level:OB.level,focus:OB.focus,goal:OB.goal||'grow',trainDays:numDays,schedule,sessionTime:String(OB.sessionMins||45),sessionMachines:machines,onboardedAt:new Date().toISOString()});
   S.saveWorkouts(workouts);
   S.set('ga_streak',0);
   S.set('ga_lang',OB.lang||'pt');
@@ -1609,6 +1797,36 @@ function homeTab(u,scheduled,streak,weekCount,lastLog,today,schedMap,returnWarn,
 window.showWorkoutSummary = function(key) {
   const wk=S.workouts()||{},t=T();
   const exercises=wk[key]||[];
+  // Check for saved session
+  const saved = getActiveSession();
+  if(saved && saved.key === key) {
+    const ov=document.createElement('div');ov.className='overlay fade-in';ov.id='resume-ov';
+    ov.innerHTML=`<div class="sheet" style="text-align:center;">
+      <div class="sheet-handle"></div>
+      <p style="font-size:11px;font-weight:700;color:var(--lime);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">Workout ${key}</p>
+      <p style="font-size:20px;font-weight:800;margin-bottom:8px;">${t.resumeSession}</p>
+      <p style="color:var(--text2);font-size:14px;margin-bottom:24px;">${t.resumeSessionDesc}</p>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button class="btn btn-primary" onclick="document.getElementById('resume-ov').remove();resumeWorkout('${key}')">${t.resumeYes}</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('resume-ov').remove();clearActiveSession();openSummarySheet('${key}')">${t.resumeNo}</button>
+      </div>
+    </div>`;
+    ov.onclick=e=>{if(e.target===ov)ov.remove();};
+    document.body.appendChild(ov);
+    return;
+  }
+  openSummarySheet(key);
+};
+
+window.resumeWorkout = function(key) {
+  const saved = getActiveSession();
+  if(!saved||saved.key!==key){startWorkout(key);return;}
+  startWorkout(key, saved.cur, saved.sessionData);
+};
+
+function openSummarySheet(key) {
+  const wk=S.workouts()||{},t=T();
+  const exercises=wk[key]||[];
   const ov=document.createElement('div');ov.className='overlay fade-in';ov.id='summary-ov';
   ov.innerHTML=`<div class="sheet" style="max-height:88vh;overflow-y:auto;">
     <div class="sheet-handle"></div>
@@ -1637,20 +1855,13 @@ window.showWorkoutSummary = function(key) {
   </div>`;
   ov.onclick=e=>{if(e.target===ov)ov.remove();};
   document.body.appendChild(ov);
-};
+}
 
 window.summaryBump = function(key, i, dir) {
   const wk=S.workouts();
   const ex=wk[key][i];
   if(!ex||ex.unit==='corpo'||ex.unit==='level') return;
-  // Smart increment: use machine's natural increment
-  // lb: most machines 5lb, small cables 2.5lb
-  // kg: 2.5kg standard, 1kg for small
-  const isSmall = ex.weight < 30; // small cable machines
-  const inc = S.unit()==='kg' ? (isSmall?1:2.5) : (isSmall?2.5:5);
-  const dispCurrent = toDisplay(ex.weight);
-  const newDisp = Math.max(0, dispCurrent + dir*inc);
-  ex.weight = fromDisplay(newDisp);
+  ex.weight = nextValidWeight(ex.name, ex.weight, dir);
   S.saveWorkouts(wk);
   const el = document.getElementById('sw-'+i);
   if(el) el.textContent = wLabel(ex);
@@ -1832,10 +2043,12 @@ window.saveEW = function(key,i) {
 // ═══════════════════════════════════════════════════════════════════════════
 // WORKOUT SCREEN
 // ═══════════════════════════════════════════════════════════════════════════
-window.startWorkout = function(key) {
+window.startWorkout = function(key, resumeCur, resumeData) {
   const wk=S.workouts()||{};
-  const exercises=wk[key]||[];
-  let cur=0, sessionData=[];
+  // Allow exercises to be mutated (add/remove) during workout
+  let exercises=[...(wk[key]||[])];
+  let cur=resumeCur||0;
+  let sessionData=resumeData||[];
   const isFirstSession=S.logs().filter(l=>l.workout===key).length===0;
   const t=T();
   const cfg=S.settings();
@@ -1843,10 +2056,11 @@ window.startWorkout = function(key) {
 
   // Auto BLE scan only if a device was previously paired
   if(cfg.autoBle && navigator.bluetooth && (cfg.bleArm || cfg.bleLeg)) {
-    setTimeout(()=>{
-      bleScan(device => showBleFoundPopup(device));
-    }, 1500);
+    setTimeout(()=>{ bleScan(device => showBleFoundPopup(device)); }, 1500);
   }
+
+  // Persist session state
+  function persist() { saveActiveSession(key, cur, sessionData); }
 
   function render() {
     const ex=exercises[cur];
@@ -1862,6 +2076,7 @@ window.startWorkout = function(key) {
           <button onclick="goBack()" style="width:38px;height:38px;border-radius:50%;background:var(--surface);border:1.5px solid var(--border);color:var(--text2);font-size:18px;cursor:pointer;flex-shrink:0;">&#8592;</button>
           <div class="prog-bar" style="flex:1;"><div class="prog-fill" style="width:${prog}%;"></div></div>
           <button onclick="showExList()" style="padding:6px 12px;background:var(--surface);border:1.5px solid var(--border);border-radius:20px;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">${cur+1}/${exercises.length} &#9776;</button>
+          <button onclick="showWorkoutMenu()" style="width:34px;height:34px;border-radius:50%;background:var(--surface);border:1.5px solid var(--border);color:var(--text2);font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;">&#8943;</button>
         </div>
         ${isFirstSession?`<div style="background:var(--amber-dim);border-radius:10px;padding:8px 12px;"><p style="font-size:12px;color:var(--amber);font-weight:500;">${t.firstSession}</p></div>`:''}
       </div>
@@ -2041,13 +2256,13 @@ window.startWorkout = function(key) {
 
   window.addSet = function(r) {
     if(!sessionData[cur]) sessionData[cur]={name:exercises[cur].name,weight:exercises[cur].weight,unit:exercises[cur].unit,reps:[]};
-    if(sessionData[cur].reps.length<NUM_SETS){sessionData[cur].reps.push(r);render();}
+    if(sessionData[cur].reps.length<NUM_SETS){sessionData[cur].reps.push(r);persist();render();}
   };
   window.addCustom = function(){const v=parseInt($('cr')?.value);if(v>0)addSet(v);};
   window.nextEx = function(){
+    persist();
     if(cur<exercises.length-1){cur++;render();}
     else{
-      // Check for any incomplete exercises before finishing
       const hasIncomplete = exercises.some((ex,i)=>!sessionData[i]||sessionData[i].reps.length===0);
       if(hasIncomplete) showPreFinishReview();
       else finishWorkout();
@@ -2056,10 +2271,68 @@ window.startWorkout = function(key) {
   window.skipEx = function(){
     if(!sessionData[cur])sessionData[cur]={name:exercises[cur].name,weight:exercises[cur].weight,unit:exercises[cur].unit,reps:[],skipped:true};
     else sessionData[cur].skipped=true;
+    persist();
     if(cur<exercises.length-1){cur++;render();}
     else{showPreFinishReview();}
   };
   window.goBack = function(){cur>0?(cur--,render()):renderDashboard();};
+
+  window.showWorkoutMenu = function() {
+    const t2=T();
+    const ov=document.createElement('div');ov.className='overlay fade-in';ov.id='wm-ov';
+    ov.innerHTML=`<div class="sheet">
+      <div class="sheet-handle"></div>
+      <p style="font-size:16px;font-weight:800;margin-bottom:16px;">Options</p>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <button onclick="document.getElementById('wm-ov').remove();showAddExercise()" style="padding:14px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;font-weight:600;cursor:pointer;text-align:left;">${t2.addExercise}</button>
+        <button onclick="document.getElementById('wm-ov').remove();removeCurrentExercise()" style="padding:14px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--red);font-size:14px;font-weight:600;cursor:pointer;text-align:left;">${t2.removeExercise}: ${exercises[cur]?.name}</button>
+        <button onclick="document.getElementById('wm-ov').remove();showExList()" style="padding:14px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text2);font-size:14px;font-weight:600;cursor:pointer;text-align:left;">All exercises</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('wm-ov').remove()">${t2.cancel}</button>
+      </div>
+    </div>`;
+    ov.onclick=e=>{if(e.target===ov)ov.remove();};
+    document.body.appendChild(ov);
+  };
+  window.removeCurrentExercise = function() {
+    if(exercises.length<=1) return;
+    exercises.splice(cur,1);
+    sessionData.splice(cur,1);
+    if(cur>=exercises.length) cur=exercises.length-1;
+    persist();render();
+  };
+  window.showAddExercise = function() {
+    const t2=T();
+    const existing=new Set(exercises.map(e=>e.name));
+    const available=Object.keys(EX_LIBRARY).filter(n=>!existing.has(n));
+    const ov=document.createElement('div');ov.className='overlay fade-in';ov.id='addex-ov';
+    ov.innerHTML=`<div class="sheet" style="max-height:85vh;overflow-y:auto;">
+      <div class="sheet-handle"></div>
+      <p style="font-size:18px;font-weight:800;margin-bottom:16px;">${t2.addExercise}</p>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        ${available.map(name=>{
+          const meta=EX_LIBRARY[name];
+          const est=estimateWeight(name,S.user()?.level||'int',S.user()?.weight||80);
+          return `<button onclick="addExerciseToWorkout('${name.replace(/'/g,"\\'")}');document.getElementById('addex-ov').remove();"
+            style="padding:12px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;cursor:pointer;text-align:left;display:flex;justify-content:space-between;align-items:center;width:100%;">
+            <div>
+              <p style="font-size:14px;font-weight:600;color:var(--text);">${name}</p>
+              <p style="font-size:11px;color:var(--text3);margin-top:2px;">${meta?.type||''} · ${meta?.group||''}</p>
+            </div>
+            <span style="font-size:13px;font-weight:700;color:var(--lime);flex-shrink:0;">${est.weight>0?dispW(est.weight)+' '+(est.unit||'lb'):'corpo'}</span>
+          </button>`;
+        }).join('')}
+      </div>
+      <button class="btn btn-ghost" style="margin-top:12px;" onclick="document.getElementById('addex-ov').remove()">${t2.cancel}</button>
+    </div>`;
+    ov.onclick=e=>{if(e.target===ov)ov.remove();};
+    document.body.appendChild(ov);
+  };
+  window.addExerciseToWorkout = function(name) {
+    const meta=EX_LIBRARY[name]||{type:'upper',group:'other'};
+    const est=estimateWeight(name,S.user()?.level||'int',S.user()?.weight||80);
+    exercises.push({name,weight:est.weight,unit:est.unit,type:meta.type,group:meta.group,caution:meta.caution||null});
+    persist();render();
+  };
 
   window.confirmEndNow = function() {
     const t2=T();
@@ -2104,16 +2377,15 @@ window.startWorkout = function(key) {
   }
 
   function finishWorkout(fromEndNow) {
+    clearActiveSession();
     // Build full exercise list: completed sets + N/A for skipped/incomplete
     const allExercises = exercises.map((ex, i) => {
       const sd = sessionData[i];
       if(sd && sd.reps && sd.reps.length > 0) {
         return {name:ex.name, weight:ex.weight, unit:ex.unit, reps:sd.reps};
       }
-      // Skipped or not reached — mark as N/A, exclude from weight progression
       return {name:ex.name, weight:ex.weight, unit:ex.unit, reps:[], skipped:true};
     });
-    // Only use completed sets for weight progression
     const doneForProgression = allExercises.filter(s => !s.skipped && s.reps.length > 0);
     S.addLog({date:new Date().toISOString(),workout:key,exercises:allExercises});
     const adjusted = autoAdjustAfterSession(exercises, doneForProgression);
@@ -2125,18 +2397,40 @@ window.startWorkout = function(key) {
     const doneCount = allExercises.filter(s=>!s.skipped).length;
     const skippedCount = allExercises.filter(s=>s.skipped).length;
 
+    // Show comment screen before done screen
+    showPostWorkoutComment(key, doneCount, skippedCount, newStreak, adjusted, t2);
+  }
+
+  function showPostWorkoutComment(wKey, doneCount, skippedCount, streak, adjusted, t2) {
     app.innerHTML=`
-    <div class="fade-in px pt-safe" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding-bottom:40px;">
-      <p style="font-size:34px;font-weight:800;letter-spacing:-.03em;margin-bottom:6px;">${t2.workoutDone}</p>
-      <p style="color:var(--text2);font-size:15px;margin-bottom:4px;">${t2.home==='Home'?'Workout':'Treino'} ${key} · ${doneCount} ${t2.exercises}</p>
-      ${skippedCount>0?`<p style="color:var(--text3);font-size:13px;margin-bottom:4px;">${skippedCount} skipped</p>`:''}
-      <p style="color:var(--amber);font-size:14px;font-weight:600;margin-bottom:${adjusted?'12px':'40px'};">${newStreak} ${t2.daysStreak}</p>
-      ${adjusted?`<div style="background:var(--lime-dim);border:1px solid var(--lime-border);border-radius:10px;padding:12px 16px;margin-bottom:32px;max-width:320px;"><p style="color:var(--lime);font-size:13px;font-weight:600;">${t2.weightsAdjusted}</p></div>`:''}
-      <div style="width:100%;max-width:320px;display:flex;flex-direction:column;gap:10px;">
-        <button class="btn btn-primary" onclick="renderDashboard()">${t2.returnHome}</button>
-        <button class="btn btn-ghost" onclick="renderDashboard('history')">${t2.seeHistory}</button>
+    <div class="fade-in px pt-safe" style="min-height:100vh;display:flex;flex-direction:column;padding-bottom:40px;">
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;">
+        <p style="font-size:34px;font-weight:800;letter-spacing:-.03em;margin-bottom:6px;">${t2.workoutDone}</p>
+        <p style="color:var(--text2);font-size:15px;margin-bottom:4px;">${t2.home==='Home'?'Workout':'Treino'} ${wKey} · ${doneCount} ${t2.exercises}</p>
+        ${skippedCount>0?`<p style="color:var(--text3);font-size:13px;margin-bottom:4px;">${skippedCount} skipped</p>`:''}
+        <p style="color:var(--amber);font-size:14px;font-weight:600;margin-bottom:${adjusted?'12px':'32px'};">${streak} ${t2.daysStreak}</p>
+        ${adjusted?`<div style="background:var(--lime-dim);border:1px solid var(--lime-border);border-radius:10px;padding:12px 16px;margin-bottom:24px;"><p style="color:var(--lime);font-size:13px;font-weight:600;">${t2.weightsAdjusted}</p></div>`:''}
+        <div style="margin-bottom:20px;">
+          <label style="display:block;font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px;">${t2.workoutComment}</label>
+          <textarea id="wc-input" placeholder="${t2.workoutCommentPlaceholder}"
+            style="width:100%;min-height:90px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;line-height:1.6;resize:none;outline:none;font-family:inherit;"
+            onfocus="this.style.borderColor='var(--lime)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button class="btn btn-primary" onclick="saveWorkoutComment()">${t2.workoutCommentSave}</button>
+        <button class="btn btn-ghost" onclick="renderDashboard()">${t2.workoutCommentSkip}</button>
       </div>
     </div>`;
+
+    window.saveWorkoutComment = function() {
+      const comment = document.getElementById('wc-input')?.value?.trim();
+      if(comment) {
+        const logs = S.logs();
+        if(logs.length) { logs[logs.length-1].comment = comment; S.set('ga_logs',logs); }
+      }
+      renderDashboard();
+    };
   }
   render();
 };
@@ -2453,13 +2747,12 @@ window.clearAll = function() {
 // ═══════════════════════════════════════════════════════════════════════════
 (function init(){
   const u=S.user();
-  if(!u){OB={};renderOnboarding();}
+  if(!u){OB={};renderTutorial();}
   else if(!S.workouts()){
-    const wk=buildWorkouts(u.focus||'full',u.trainDays||3,u.level||'int',u.weight||80);
+    const wk=buildWorkouts(u.focus||'full',u.trainDays||3,u.level||'int',u.weight||80,u.sessionMachines||9);
     S.saveWorkouts(wk);renderDashboard();
   }
   else{
-    // Auto weight review if enabled and due
     const cfg=S.settings();
     if(cfg.autoWeights && checkAutoWeightsDue() && S.logs().length > 0) {
       runAutoWeightReview();
